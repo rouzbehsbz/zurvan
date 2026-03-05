@@ -152,3 +152,30 @@ func QueryOne4[A, B, C, D any](world *World, entity Entity) (*A, *B, *C, *D) {
 
 	return &dataA, &dataB, &dataC, &dataD
 }
+
+func QueryOne5[A, B, C, D, E any](world *World, entity Entity) (*A, *B, *C, *D, *E) {
+	componentAId := DataIdFor[A](world.componentRegistry)
+	componentBId := DataIdFor[B](world.componentRegistry)
+	componentCId := DataIdFor[C](world.componentRegistry)
+	componentDId := DataIdFor[D](world.componentRegistry)
+	componentEId := DataIdFor[E](world.componentRegistry)
+
+	archetype, row := world.archetypeAllocator.MatchingArchetype(entity)
+	if archetype == nil || row == -1 {
+		return nil, nil, nil, nil, nil
+	}
+
+	columnA := archetype.Column(componentAId)
+	columnB := archetype.Column(componentBId)
+	columnC := archetype.Column(componentCId)
+	columnD := archetype.Column(componentDId)
+	columnE := archetype.Column(componentEId)
+
+	dataA := columnA.Get(row).(A)
+	dataB := columnB.Get(row).(B)
+	dataC := columnC.Get(row).(C)
+	dataD := columnD.Get(row).(D)
+	dataE := columnE.Get(row).(E)
+
+	return &dataA, &dataB, &dataC, &dataD, &dataE
+}
