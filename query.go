@@ -1,6 +1,6 @@
 package zurvan
 
-func Query1[A any](world *World, fn func(Entity, *A)) {
+func Query1[A any](world *World, fn func(Entity, A)) {
 	componentId := DataIdFor[A](world.componentRegistry)
 
 	archetypes := world.archetypeAllocator.MatchingArchetypes(componentId)
@@ -10,12 +10,12 @@ func Query1[A any](world *World, fn func(Entity, *A)) {
 		slice := column.AsSlice().([]A)
 
 		for i := range len(entities) {
-			fn(entities[i], &slice[i])
+			fn(entities[i], slice[i])
 		}
 	}
 }
 
-func Query2[A, B any](world *World, fn func(Entity, *A, *B)) {
+func Query2[A, B any](world *World, fn func(Entity, A, B)) {
 	componentAId := DataIdFor[A](world.componentRegistry)
 	componentBId := DataIdFor[B](world.componentRegistry)
 
@@ -30,12 +30,12 @@ func Query2[A, B any](world *World, fn func(Entity, *A, *B)) {
 		sliceB := columnB.AsSlice().([]B)
 
 		for i := range len(entities) {
-			fn(entities[i], &sliceA[i], &sliceB[i])
+			fn(entities[i], sliceA[i], sliceB[i])
 		}
 	}
 }
 
-func Query3[A, B, C any](world *World, fn func(Entity, *A, *B, *C)) {
+func Query3[A, B, C any](world *World, fn func(Entity, A, B, C)) {
 	componentAId := DataIdFor[A](world.componentRegistry)
 	componentBId := DataIdFor[B](world.componentRegistry)
 	componentCId := DataIdFor[C](world.componentRegistry)
@@ -53,7 +53,33 @@ func Query3[A, B, C any](world *World, fn func(Entity, *A, *B, *C)) {
 		sliceC := columnC.AsSlice().([]C)
 
 		for i := range len(entities) {
-			fn(entities[i], &sliceA[i], &sliceB[i], &sliceC[i])
+			fn(entities[i], sliceA[i], sliceB[i], sliceC[i])
+		}
+	}
+}
+
+func Query4[A, B, C, D any](world *World, fn func(Entity, A, B, C, D)) {
+	componentAId := DataIdFor[A](world.componentRegistry)
+	componentBId := DataIdFor[B](world.componentRegistry)
+	componentCId := DataIdFor[C](world.componentRegistry)
+	componentDId := DataIdFor[D](world.componentRegistry)
+
+	archetypes := world.archetypeAllocator.MatchingArchetypes(componentAId, componentBId, componentCId, componentDId)
+	for _, archetype := range archetypes {
+		entities := archetype.Entities()
+
+		columnA := archetype.Column(componentAId)
+		columnB := archetype.Column(componentBId)
+		columnC := archetype.Column(componentCId)
+		columnD := archetype.Column(componentDId)
+
+		sliceA := columnA.AsSlice().([]A)
+		sliceB := columnB.AsSlice().([]B)
+		sliceC := columnC.AsSlice().([]C)
+		sliceD := columnD.AsSlice().([]D)
+
+		for i := range len(entities) {
+			fn(entities[i], sliceA[i], sliceB[i], sliceC[i], sliceD[i])
 		}
 	}
 }

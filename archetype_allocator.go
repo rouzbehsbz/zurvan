@@ -64,7 +64,7 @@ func (a *ArchetypeAllocator) AddComponents(entity Entity, components ...any) {
 		targetArchetype := a.archetypes[location.Mask]
 
 		if MaskHasComponents(location.Mask, mask) {
-			a.SetComponents(targetArchetype, location.Row, components)
+			a.setComponents(targetArchetype, location.Row, components)
 			return
 		}
 
@@ -74,7 +74,13 @@ func (a *ArchetypeAllocator) AddComponents(entity Entity, components ...any) {
 			a.archetypes[mask] = targetArchetype
 		}
 
-		a.MoveEntity(entity, location, targetArchetype, mask)
+		source := a.archetypes[location.Mask]
+		newRow := targetArchetype.AddEntity(entity)
+
+		source.MoveComponents(location.Row, newRow, targetArchetype)
+		source.RemoveEntity(location.Row)
+
+		a.locations[entity] = NewEntityLocation(mask, newRow)
 		return
 	}
 
@@ -84,7 +90,10 @@ func (a *ArchetypeAllocator) AddComponents(entity Entity, components ...any) {
 		a.archetypes[mask] = targetArchetype
 	}
 
-	a.AddNewEntity(entity, targetArchetype, mask, components)
+	row := targetArchetype.AddEntity(entity)
+
+	a.setComponents(targetArchetype, row, components)
+	a.locations[entity] = NewEntityLocation(mask, row)
 }
 
 func (a *ArchetypeAllocator) RemoveEntity(entity Entity) {
@@ -93,32 +102,6 @@ func (a *ArchetypeAllocator) RemoveEntity(entity Entity) {
 
 	archetype.RemoveEntity(location.Row)
 	delete(a.locations, entity)
-}
-
-func (a *ArchetypeAllocator) AddNewEntity(entity Entity, archetype *Archetype, mask Mask, components []any) {
-	row := archetype.AddEntity(entity)
-
-	a.SetComponents(archetype, row, components)
-
-	a.locations[entity] = NewEntityLocation(mask, row)
-}
-
-func (a *ArchetypeAllocator) MoveEntity(entity Entity, location EntityLocation, target *Archetype, newMask Mask) {
-	source := a.archetypes[location.Mask]
-
-	newRow := target.AddEntity(entity)
-
-	source.MoveComponents(location.Row, newRow, target)
-	source.RemoveEntity(location.Row)
-
-	a.locations[entity] = NewEntityLocation(newMask, newRow)
-}
-
-func (a *ArchetypeAllocator) SetComponents(archetype *Archetype, row int, components []any) {
-	for _, c := range components {
-		id := a.registry.DataId(c)
-		archetype.AddComponent(row, id, c)
-	}
 }
 
 func (a *ArchetypeAllocator) MatchingArchetypes(componentIds ...int) []*Archetype {
@@ -133,4 +116,11 @@ func (a *ArchetypeAllocator) MatchingArchetypes(componentIds ...int) []*Archetyp
 	}
 
 	return archetypes
+}
+
+func (a *ArchetypeAllocator) setComponents(archetype *Archetype, row int, components []any) {
+	for _, c := range components {
+		id := a.registry.DataId(c)
+		archetype.AddComponent(row, id, c)
+	}
 }

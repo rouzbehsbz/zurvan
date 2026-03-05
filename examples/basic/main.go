@@ -22,7 +22,7 @@ func main() {
 	world.PushCommands(
 		zurvan.NewSetComponentsCommand(
 			e,
-			Position{X: 0, Y: 0},
+			&Position{X: 0, Y: 0},
 			Velocity{X: 10, Y: 10},
 		),
 	)
@@ -48,7 +48,7 @@ func (m *MovementSystem) Stage() zurvan.Stage {
 	return zurvan.UpdateStage
 }
 func (m *MovementSystem) Update(w *zurvan.World, dt time.Duration) {
-	zurvan.Query2[Position, Velocity](w, func(e zurvan.Entity, p *Position, v *Velocity) {
+	zurvan.Query2[*Position, Velocity](w, func(e zurvan.Entity, p *Position, v Velocity) {
 		dt := dt.Seconds()
 
 		p.X += v.X * dt
@@ -79,7 +79,7 @@ func (m *RespawnSystem) Update(w *zurvan.World, dt time.Duration) {
 
 		w.PushCommands(
 			zurvan.NewSetComponentsCommand(event.Entity,
-				Position{X: 0, Y: 0},
+				&Position{X: 0, Y: 0},
 			),
 		)
 	}
