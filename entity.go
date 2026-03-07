@@ -5,7 +5,7 @@ type Entity struct {
 	Generation int
 }
 
-func NewEntity(index, generation int) Entity {
+func newEntity(index, generation int) Entity {
 	return Entity{
 		Index:      index,
 		Generation: generation,

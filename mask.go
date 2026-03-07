@@ -1,9 +1,9 @@
 package zurvan
 
-type Mask = uint64
+type mask = uint64
 
-func MaskBit(componentIds ...int) Mask {
-	var mask Mask
+func maskBit(componentIds ...int) mask {
+	var mask mask
 
 	for _, componentId := range componentIds {
 		mask |= 1 << componentId
@@ -12,6 +12,6 @@ func MaskBit(componentIds ...int) Mask {
 	return mask
 }
 
-func MaskHasComponents(mask, query Mask) bool {
+func maskHasComponents(mask, query mask) bool {
 	return mask&query == query
 }

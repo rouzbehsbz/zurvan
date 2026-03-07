@@ -1,11 +1,11 @@
 package zurvan
 
-type Column interface {
-	Resize(length int)
-	Len() int
-	Remove(index int)
-	Set(index int, value any)
-	Get(index int) any
-	AsSlice() any
-	Push(value any)
+type column interface {
+	resize(length int)
+	len() int
+	remove(index int)
+	set(index int, value any)
+	get(index int) any
+	asSlice() any
+	push(value any)
 }

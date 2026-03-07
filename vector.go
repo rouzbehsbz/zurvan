@@ -2,17 +2,17 @@ package zurvan
 
 import "reflect"
 
-type Vector struct {
+type vector struct {
 	data reflect.Value
 }
 
-func NewVector(elemType reflect.Type) *Vector {
-	return &Vector{
+func newVector(elemType reflect.Type) *vector {
+	return &vector{
 		data: reflect.MakeSlice(reflect.SliceOf(elemType), 0, 0),
 	}
 }
 
-func (v *Vector) Resize(length int) {
+func (v *vector) resize(length int) {
 	current := v.data.Len()
 
 	if length <= current {
@@ -30,12 +30,12 @@ func (v *Vector) Resize(length int) {
 	v.data = reflect.AppendSlice(v.data, extra)
 }
 
-func (v *Vector) Len() int {
+func (v *vector) len() int {
 	return v.data.Len()
 }
 
-func (v *Vector) Remove(index int) {
-	length := v.Len()
+func (v *vector) remove(index int) {
+	length := v.len()
 	if index >= length {
 		return
 	}
@@ -50,8 +50,8 @@ func (v *Vector) Remove(index int) {
 	v.data = v.data.Slice(0, lastIndex)
 }
 
-func (v *Vector) Set(index int, value any) {
-	if index >= v.Len() {
+func (v *vector) set(index int, value any) {
+	if index >= v.len() {
 		return
 	}
 
@@ -59,19 +59,19 @@ func (v *Vector) Set(index int, value any) {
 	v.data.Index(index).Set(val)
 }
 
-func (v *Vector) Get(index int) any {
-	if index >= v.Len() {
+func (v *vector) get(index int) any {
+	if index >= v.len() {
 		return nil
 	}
 
 	return v.data.Index(index).Interface()
 }
 
-func (v *Vector) AsSlice() any {
+func (v *vector) asSlice() any {
 	return v.data.Interface()
 }
 
-func (v *Vector) Push(value any) {
+func (v *vector) push(value any) {
 	val := reflect.ValueOf(value)
 
 	v.data = reflect.Append(v.data, val)

@@ -2,47 +2,50 @@ package zurvan
 
 import (
 	"reflect"
+	"slices"
 )
 
-type ColumnEntry struct {
-	ComponentId int
-	Column      Column
+type columnEntry struct {
+	componentId int
+	elemType    reflect.Type
+	column      column
 }
 
-func NewColumnEntry(componentId int, elemType reflect.Type) ColumnEntry {
-	return ColumnEntry{
-		ComponentId: componentId,
-		Column:      NewVector(elemType),
+func newColumnEntry(componentId int, elemType reflect.Type) columnEntry {
+	return columnEntry{
+		componentId: componentId,
+		elemType:    elemType,
+		column:      newVector(elemType),
 	}
 }
 
-type Archetype struct {
+type archetype struct {
 	entities []Entity
-	columns  []ColumnEntry
+	columns  []columnEntry
 
 	componentIndex map[int]int
 }
 
-func NewArchetype(entries []ComponentEntry) *Archetype {
-	columns := []ColumnEntry{}
+func newArchetype(entries []componentEntry) *archetype {
+	columns := []columnEntry{}
 	componentIndex := make(map[int]int, len(entries))
 
 	for _, entry := range entries {
 		index := len(columns)
 
-		columns = append(columns, NewColumnEntry(entry.Id, entry.ElemType))
+		columns = append(columns, newColumnEntry(entry.id, entry.elemType))
 
-		componentIndex[entry.Id] = index
+		componentIndex[entry.id] = index
 	}
 
-	return &Archetype{
+	return &archetype{
 		entities:       []Entity{},
 		columns:        columns,
 		componentIndex: componentIndex,
 	}
 }
 
-func (a *Archetype) IsEntityAlive(entity Entity, row int) bool {
+func (a *archetype) isEntityAlive(entity Entity, row int) bool {
 	if row >= len(a.entities) {
 		return false
 	}
@@ -52,18 +55,18 @@ func (a *Archetype) IsEntityAlive(entity Entity, row int) bool {
 	return e.Index == entity.Index && e.Generation == entity.Generation
 }
 
-func (a *Archetype) AddEntity(entity Entity) int {
+func (a *archetype) addEntity(entity Entity) int {
 	row := len(a.entities)
 	a.entities = append(a.entities, entity)
 
 	for _, entry := range a.columns {
-		entry.Column.Resize(len(a.entities))
+		entry.column.resize(len(a.entities))
 	}
 
 	return row
 }
 
-func (a *Archetype) RemoveEntity(row int) (Entity, int) {
+func (a *archetype) removeEntity(row int) (Entity, int) {
 	length := len(a.entities)
 	if row >= length {
 		return Entity{}, -1
@@ -76,7 +79,7 @@ func (a *Archetype) RemoveEntity(row int) (Entity, int) {
 	a.entities = a.entities[:lastIndex]
 
 	for _, entry := range a.columns {
-		entry.Column.Remove(row)
+		entry.column.remove(row)
 	}
 
 	if row != lastIndex {
@@ -86,25 +89,26 @@ func (a *Archetype) RemoveEntity(row int) (Entity, int) {
 	return Entity{}, -1
 }
 
-func (a *Archetype) AddComponent(row int, componentId int, component any) {
+func (a *archetype) addComponent(row int, componentId int, component any) {
 	columnIndex := a.componentIndex[componentId]
 	entry := a.columns[columnIndex]
-	entry.Column.Set(row, component)
+	entry.column.set(row, component)
 }
 
-func (a *Archetype) MoveComponents(row int, dstRow int, dstArchetype *Archetype) {
+func (a *archetype) moveComponents(row int, dstRow int, dstArchetype *archetype, excludeCompIds ...int) {
 	for _, entry := range a.columns {
-		component := entry.Column.Get(row)
-		dstArchetype.AddComponent(dstRow, entry.ComponentId, component)
+		component := entry.column.get(row)
+
+		if slices.Contains(excludeCompIds, entry.componentId) {
+			continue
+		}
+
+		dstArchetype.addComponent(dstRow, entry.componentId, component)
 	}
 }
 
-func (a *Archetype) Entities() []Entity {
-	return a.entities
-}
-
-func (a *Archetype) Column(componentId int) Column {
+func (a *archetype) column(componentId int) column {
 	entry := a.columns[componentId]
 
-	return entry.Column
+	return entry.column
 }

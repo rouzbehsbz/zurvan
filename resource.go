@@ -2,19 +2,19 @@ package zurvan
 
 import "reflect"
 
-type Resources struct {
+type resources struct {
 	storage  map[int]any
-	registry *Registry
+	registry *registry
 }
 
-func NewResources() *Resources {
-	return &Resources{
+func newResources() *resources {
+	return &resources{
 		storage:  make(map[int]any),
-		registry: NewRegistry(),
+		registry: newRegistry(),
 	}
 }
 
-func (r *Resources) AddResource(resource any) {
+func (r *resources) addResource(resource any) {
 	resourceType := reflect.TypeOf(resource)
 	resourceId := r.registry.dataId(resourceType)
 
@@ -22,7 +22,7 @@ func (r *Resources) AddResource(resource any) {
 }
 
 func Resource[T any](w *World) (T, bool) {
-	resourceId := DataIdFor[T](w.resources.registry)
+	resourceId := dataIdFor[T](w.resources.registry)
 
 	resource, ok := w.resources.storage[resourceId]
 	if !ok {

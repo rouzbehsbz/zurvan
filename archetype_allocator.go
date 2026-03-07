@@ -2,115 +2,157 @@ package zurvan
 
 import (
 	"reflect"
+	"slices"
 	"sort"
 )
 
-type EntityLocation struct {
-	Mask Mask
-	Row  int
+type entityLocation struct {
+	mask mask
+	row  int
 }
 
-func NewEntityLocation(mask Mask, row int) EntityLocation {
-	return EntityLocation{
-		Mask: mask,
-		Row:  row,
+func newEntityLocation(mask mask, row int) entityLocation {
+	return entityLocation{
+		mask: mask,
+		row:  row,
 	}
 }
 
-type ComponentEntry struct {
-	Id       int
-	ElemType reflect.Type
+type componentEntry struct {
+	id       int
+	elemType reflect.Type
 }
 
-func NewComponentEntry(id int, elemType reflect.Type) ComponentEntry {
-	return ComponentEntry{
-		Id:       id,
-		ElemType: elemType,
+func newComponentEntry(id int, elemType reflect.Type) componentEntry {
+	return componentEntry{
+		id:       id,
+		elemType: elemType,
 	}
 }
 
-type ArchetypeAllocator struct {
-	archetypes map[Mask]*Archetype
-	locations  map[Entity]EntityLocation
+type archetypeAllocator struct {
+	archetypes map[mask]*archetype
+	locations  map[Entity]entityLocation
 
-	registry *Registry
+	registry *registry
 }
 
-func NewArchetypeAllocator(registry *Registry) *ArchetypeAllocator {
-	return &ArchetypeAllocator{
-		archetypes: make(map[Mask]*Archetype),
-		locations:  make(map[Entity]EntityLocation),
+func NewArchetypeAllocator(registry *registry) *archetypeAllocator {
+	return &archetypeAllocator{
+		archetypes: make(map[mask]*archetype),
+		locations:  make(map[Entity]entityLocation),
 		registry:   registry,
 	}
 }
 
-func (a *ArchetypeAllocator) AddComponents(entity Entity, components ...any) {
-	var mask Mask
+func (a *archetypeAllocator) addComponents(entity Entity, components ...any) {
+	var mask mask
 
-	entries := make([]ComponentEntry, 0, len(components))
+	entries := make([]componentEntry, 0, len(components))
 
 	for _, c := range components {
-		id := a.registry.DataId(c)
-		mask |= MaskBit(id)
-		entries = append(entries, NewComponentEntry(id, reflect.TypeOf(c)))
+		id := a.registry.dataIdOf(c)
+		mask |= maskBit(id)
+		entries = append(entries, newComponentEntry(id, reflect.TypeOf(c)))
 	}
 
 	sort.Slice(entries, func(i, j int) bool {
-		return entries[i].Id < entries[j].Id
+		return entries[i].id < entries[j].id
 	})
 
 	location, exists := a.locations[entity]
 	if exists {
-		targetArchetype := a.archetypes[location.Mask]
+		target := a.archetypes[location.mask]
 
-		if MaskHasComponents(location.Mask, mask) {
-			a.setComponents(targetArchetype, location.Row, components)
+		if maskHasComponents(location.mask, mask) {
+			a.setComponents(target, location.row, components)
 			return
 		}
 
-		targetArchetype, ok := a.archetypes[mask]
+		target, ok := a.archetypes[mask]
 		if !ok {
-			targetArchetype = NewArchetype(entries)
-			a.archetypes[mask] = targetArchetype
+			target = newArchetype(entries)
+			a.archetypes[mask] = target
 		}
 
-		source := a.archetypes[location.Mask]
-		newRow := targetArchetype.AddEntity(entity)
+		source := a.archetypes[location.mask]
+		newRow := target.addEntity(entity)
 
-		source.MoveComponents(location.Row, newRow, targetArchetype)
-		source.RemoveEntity(location.Row)
+		source.moveComponents(location.row, newRow, target)
+		source.removeEntity(location.row)
 
-		a.locations[entity] = NewEntityLocation(mask, newRow)
+		a.locations[entity] = newEntityLocation(mask, newRow)
 		return
 	}
 
 	targetArchetype, ok := a.archetypes[mask]
 	if !ok {
-		targetArchetype = NewArchetype(entries)
+		targetArchetype = newArchetype(entries)
 		a.archetypes[mask] = targetArchetype
 	}
 
-	row := targetArchetype.AddEntity(entity)
+	row := targetArchetype.addEntity(entity)
 
 	a.setComponents(targetArchetype, row, components)
-	a.locations[entity] = NewEntityLocation(mask, row)
+	a.locations[entity] = newEntityLocation(mask, row)
 }
 
-func (a *ArchetypeAllocator) RemoveEntity(entity Entity) {
-	location := a.locations[entity]
-	archetype := a.archetypes[location.Mask]
+func (a *archetypeAllocator) DeleteComponents(entity Entity, components ...any) {
+	location, exists := a.locations[entity]
+	if !exists {
+		return
+	}
 
-	archetype.RemoveEntity(location.Row)
+	mask := location.mask
+	excludeCompIds := []int{}
+
+	for _, c := range components {
+		id := a.registry.dataIdOf(c)
+		mask &= ^maskBit(id)
+		excludeCompIds = append(excludeCompIds, id)
+	}
+
+	source := a.archetypes[location.mask]
+	target, ok := a.archetypes[mask]
+	if !ok {
+		entries := make([]componentEntry, 0, len(components))
+
+		for _, column := range source.columns {
+			if slices.Contains(excludeCompIds, column.componentId) {
+				continue
+			}
+
+			entries = append(entries, newComponentEntry(column.componentId, column.elemType))
+		}
+
+		sort.Slice(entries, func(i, j int) bool {
+			return entries[i].id < entries[j].id
+		})
+
+		target = newArchetype(entries)
+		a.archetypes[mask] = target
+	}
+
+	row := target.addEntity(entity)
+	source.moveComponents(location.row, row, target, excludeCompIds...)
+	source.removeEntity(location.row)
+}
+
+func (a *archetypeAllocator) RemoveEntity(entity Entity) {
+	location := a.locations[entity]
+	archetype := a.archetypes[location.mask]
+
+	archetype.removeEntity(location.row)
 	delete(a.locations, entity)
 }
 
-func (a *ArchetypeAllocator) MatchingArchetypes(componentIds ...int) []*Archetype {
-	archetypes := []*Archetype{}
+func (a *archetypeAllocator) MatchingArchetypes(componentIds ...int) []*archetype {
+	archetypes := []*archetype{}
 
 	for mask, archetype := range a.archetypes {
-		queryMask := MaskBit(componentIds...)
+		queryMask := maskBit(componentIds...)
 
-		if MaskHasComponents(mask, queryMask) {
+		if maskHasComponents(mask, queryMask) {
 			archetypes = append(archetypes, archetype)
 		}
 	}
@@ -118,19 +160,19 @@ func (a *ArchetypeAllocator) MatchingArchetypes(componentIds ...int) []*Archetyp
 	return archetypes
 }
 
-func (a *ArchetypeAllocator) MatchingArchetype(entity Entity) (*Archetype, int) {
+func (a *archetypeAllocator) matchingArchetype(entity Entity) (*archetype, int) {
 	location, ok := a.locations[entity]
 	if !ok {
 		return nil, -1
 	}
 
-	archetype := a.archetypes[location.Mask]
-	return archetype, location.Row
+	archetype := a.archetypes[location.mask]
+	return archetype, location.row
 }
 
-func (a *ArchetypeAllocator) setComponents(archetype *Archetype, row int, components []any) {
+func (a *archetypeAllocator) setComponents(archetype *archetype, row int, components []any) {
 	for _, c := range components {
-		id := a.registry.DataId(c)
-		archetype.AddComponent(row, id, c)
+		id := a.registry.dataIdOf(c)
+		archetype.addComponent(row, id, c)
 	}
 }

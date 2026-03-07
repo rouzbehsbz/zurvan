@@ -2,21 +2,21 @@ package zurvan
 
 import "sync"
 
-type EntityAllocator struct {
+type entityAllocator struct {
 	generations []int
 	availables  []int
 	mu          sync.Mutex
 }
 
-func NewEntityAllocator() *EntityAllocator {
-	return &EntityAllocator{
+func newEntityAllocator() *entityAllocator {
+	return &entityAllocator{
 		generations: []int{},
 		availables:  []int{},
 		mu:          sync.Mutex{},
 	}
 }
 
-func (e *EntityAllocator) Create() Entity {
+func (e *entityAllocator) create() Entity {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
@@ -24,7 +24,7 @@ func (e *EntityAllocator) Create() Entity {
 		index := len(e.generations)
 		e.generations = append(e.generations, 0)
 
-		return NewEntity(index, 0)
+		return newEntity(index, 0)
 	}
 
 	lastIndex := len(e.availables) - 1
@@ -33,10 +33,10 @@ func (e *EntityAllocator) Create() Entity {
 	e.availables = e.availables[:lastIndex]
 	generation := e.generations[index]
 
-	return NewEntity(index, generation)
+	return newEntity(index, generation)
 }
 
-func (e *EntityAllocator) Delete(entity Entity) {
+func (e *entityAllocator) delete(entity Entity) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
@@ -46,7 +46,7 @@ func (e *EntityAllocator) Delete(entity Entity) {
 	}
 }
 
-func (e *EntityAllocator) isAliveUnsafe(entity Entity) bool {
+func (e *entityAllocator) isAliveUnsafe(entity Entity) bool {
 	if entity.Index >= len(e.generations) {
 		return false
 	}

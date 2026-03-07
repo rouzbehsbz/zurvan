@@ -1,7 +1,7 @@
 package zurvan
 
 func QueryMany1[A any](world *World, fn func([]Entity, []A)) {
-	componentId := DataIdFor[A](world.componentRegistry)
+	componentId := dataIdFor[A](world.componentRegistry)
 
 	archetypes := world.archetypeAllocator.MatchingArchetypes(componentId)
 	for _, archetype := range archetypes {
@@ -14,8 +14,8 @@ func QueryMany1[A any](world *World, fn func([]Entity, []A)) {
 }
 
 func QueryMany2[A, B any](world *World, fn func([]Entity, []A, []B)) {
-	componentAId := DataIdFor[A](world.componentRegistry)
-	componentBId := DataIdFor[B](world.componentRegistry)
+	componentAId := dataIdFor[A](world.componentRegistry)
+	componentBId := dataIdFor[B](world.componentRegistry)
 
 	archetypes := world.archetypeAllocator.MatchingArchetypes(componentAId, componentBId)
 	for _, archetype := range archetypes {
@@ -32,9 +32,9 @@ func QueryMany2[A, B any](world *World, fn func([]Entity, []A, []B)) {
 }
 
 func QueryMany3[A, B, C any](world *World, fn func([]Entity, []A, []B, []C)) {
-	componentAId := DataIdFor[A](world.componentRegistry)
-	componentBId := DataIdFor[B](world.componentRegistry)
-	componentCId := DataIdFor[C](world.componentRegistry)
+	componentAId := dataIdFor[A](world.componentRegistry)
+	componentBId := dataIdFor[B](world.componentRegistry)
+	componentCId := dataIdFor[C](world.componentRegistry)
 
 	archetypes := world.archetypeAllocator.MatchingArchetypes(componentAId, componentBId, componentCId)
 	for _, archetype := range archetypes {
@@ -53,10 +53,10 @@ func QueryMany3[A, B, C any](world *World, fn func([]Entity, []A, []B, []C)) {
 }
 
 func QueryMany4[A, B, C, D any](world *World, fn func([]Entity, []A, []B, []C, []D)) {
-	componentAId := DataIdFor[A](world.componentRegistry)
-	componentBId := DataIdFor[B](world.componentRegistry)
-	componentCId := DataIdFor[C](world.componentRegistry)
-	componentDId := DataIdFor[D](world.componentRegistry)
+	componentAId := dataIdFor[A](world.componentRegistry)
+	componentBId := dataIdFor[B](world.componentRegistry)
+	componentCId := dataIdFor[C](world.componentRegistry)
+	componentDId := dataIdFor[D](world.componentRegistry)
 
 	archetypes := world.archetypeAllocator.MatchingArchetypes(componentAId, componentBId, componentCId, componentDId)
 	for _, archetype := range archetypes {
@@ -77,7 +77,7 @@ func QueryMany4[A, B, C, D any](world *World, fn func([]Entity, []A, []B, []C, [
 }
 
 func QueryOne1[A any](world *World, entity Entity) *A {
-	componentId := DataIdFor[A](world.componentRegistry)
+	componentId := dataIdFor[A](world.componentRegistry)
 
 	archetype, row := world.archetypeAllocator.MatchingArchetype(entity)
 	if archetype == nil || row == -1 {
@@ -91,8 +91,8 @@ func QueryOne1[A any](world *World, entity Entity) *A {
 }
 
 func QueryOne2[A, B any](world *World, entity Entity) (*A, *B) {
-	componentAId := DataIdFor[A](world.componentRegistry)
-	componentBId := DataIdFor[B](world.componentRegistry)
+	componentAId := dataIdFor[A](world.componentRegistry)
+	componentBId := dataIdFor[B](world.componentRegistry)
 
 	archetype, row := world.archetypeAllocator.MatchingArchetype(entity)
 	if archetype == nil || row == -1 {
@@ -109,9 +109,9 @@ func QueryOne2[A, B any](world *World, entity Entity) (*A, *B) {
 }
 
 func QueryOne3[A, B, C any](world *World, entity Entity) (*A, *B, *C) {
-	componentAId := DataIdFor[A](world.componentRegistry)
-	componentBId := DataIdFor[B](world.componentRegistry)
-	componentCId := DataIdFor[C](world.componentRegistry)
+	componentAId := dataIdFor[A](world.componentRegistry)
+	componentBId := dataIdFor[B](world.componentRegistry)
+	componentCId := dataIdFor[C](world.componentRegistry)
 
 	archetype, row := world.archetypeAllocator.MatchingArchetype(entity)
 	if archetype == nil || row == -1 {
@@ -130,10 +130,10 @@ func QueryOne3[A, B, C any](world *World, entity Entity) (*A, *B, *C) {
 }
 
 func QueryOne4[A, B, C, D any](world *World, entity Entity) (*A, *B, *C, *D) {
-	componentAId := DataIdFor[A](world.componentRegistry)
-	componentBId := DataIdFor[B](world.componentRegistry)
-	componentCId := DataIdFor[C](world.componentRegistry)
-	componentDId := DataIdFor[D](world.componentRegistry)
+	componentAId := dataIdFor[A](world.componentRegistry)
+	componentBId := dataIdFor[B](world.componentRegistry)
+	componentCId := dataIdFor[C](world.componentRegistry)
+	componentDId := dataIdFor[D](world.componentRegistry)
 
 	archetype, row := world.archetypeAllocator.MatchingArchetype(entity)
 	if archetype == nil || row == -1 {
@@ -154,11 +154,11 @@ func QueryOne4[A, B, C, D any](world *World, entity Entity) (*A, *B, *C, *D) {
 }
 
 func QueryOne5[A, B, C, D, E any](world *World, entity Entity) (*A, *B, *C, *D, *E) {
-	componentAId := DataIdFor[A](world.componentRegistry)
-	componentBId := DataIdFor[B](world.componentRegistry)
-	componentCId := DataIdFor[C](world.componentRegistry)
-	componentDId := DataIdFor[D](world.componentRegistry)
-	componentEId := DataIdFor[E](world.componentRegistry)
+	componentAId := dataIdFor[A](world.componentRegistry)
+	componentBId := dataIdFor[B](world.componentRegistry)
+	componentCId := dataIdFor[C](world.componentRegistry)
+	componentDId := dataIdFor[D](world.componentRegistry)
+	componentEId := dataIdFor[E](world.componentRegistry)
 
 	archetype, row := world.archetypeAllocator.MatchingArchetype(entity)
 	if archetype == nil || row == -1 {

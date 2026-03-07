@@ -23,19 +23,19 @@ func BuildStageSystems(stage Stage, systems ...System) (Stage, []System) {
 	return stage, systems
 }
 
-type Scheduler struct {
+type scheduler struct {
 	isRunning bool
 
 	systems  map[Stage][]System
-	commands *Commands
-	events   *Events
+	commands *commands
+	events   *events
 
 	tickRate    time.Duration
 	accumulator time.Duration
 }
 
-func NewScheduler(commands *Commands, events *Events, tickRate time.Duration) *Scheduler {
-	return &Scheduler{
+func NewScheduler(commands *commands, events *events, tickRate time.Duration) *scheduler {
+	return &scheduler{
 		isRunning:   true,
 		systems:     make(map[Stage][]System),
 		commands:    commands,
@@ -45,7 +45,7 @@ func NewScheduler(commands *Commands, events *Events, tickRate time.Duration) *S
 	}
 }
 
-func (s *Scheduler) Stage(stage Stage) []System {
+func (s *scheduler) stage(stage Stage) []System {
 	systems, ok := s.systems[stage]
 	if !ok {
 		systems = []System{}
@@ -55,26 +55,26 @@ func (s *Scheduler) Stage(stage Stage) []System {
 	return systems
 }
 
-func (s *Scheduler) AddSystem(stage Stage, system System) {
-	systems := s.Stage(stage)
+func (s *scheduler) addSystem(stage Stage, system System) {
+	systems := s.stage(stage)
 	systems = append(systems, system)
 	s.systems[stage] = systems
 }
 
-func (s *Scheduler) RunStage(world *World, stage Stage, dt time.Duration) {
-	systems := s.Stage(stage)
+func (s *scheduler) runStage(world *World, stage Stage, dt time.Duration) {
+	systems := s.stage(stage)
 
 	for _, system := range systems {
 		system.Update(world, dt)
 	}
 
-	s.commands.Apply(world)
+	s.commands.apply(world)
 }
 
-func (s *Scheduler) Run(world *World) {
+func (s *scheduler) run(world *World) {
 	last := time.Now()
 
-	s.RunStage(world, StartupStage, 0)
+	s.runStage(world, StartupStage, 0)
 
 	for s.isRunning {
 		now := time.Now()
@@ -83,15 +83,15 @@ func (s *Scheduler) Run(world *World) {
 
 		s.accumulator += frameTime
 
-		s.RunStage(world, PreUpdateStage, frameTime)
+		s.runStage(world, PreUpdateStage, frameTime)
 
 		for s.accumulator >= s.tickRate {
-			s.RunStage(world, FixedUpdateStage, s.tickRate)
+			s.runStage(world, FixedUpdateStage, s.tickRate)
 			s.accumulator -= s.tickRate
 		}
 
-		s.RunStage(world, UpdateStage, frameTime)
-		s.RunStage(world, PostUpdateStage, frameTime)
+		s.runStage(world, UpdateStage, frameTime)
+		s.runStage(world, PostUpdateStage, frameTime)
 
 		s.events.Clear()
 
@@ -101,5 +101,5 @@ func (s *Scheduler) Run(world *World) {
 		}
 	}
 
-	s.RunStage(world, EndStage, 0)
+	s.runStage(world, EndStage, 0)
 }

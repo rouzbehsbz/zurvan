@@ -1,76 +1,92 @@
 package zurvan
 
-type Command interface {
-	Execute(w *World)
+type command interface {
+	execute(w *World)
 }
 
-type Commands struct {
-	commands []Command
+type commands struct {
+	commands []command
 }
 
-func NewCommands() *Commands {
-	return &Commands{
-		commands: []Command{},
+func newCommands() *commands {
+	return &commands{
+		commands: []command{},
 	}
 }
 
-func (c *Commands) AddCommand(command Command) {
+func (c *commands) addCommand(command command) {
 	c.commands = append(c.commands, command)
 }
 
-func (c *Commands) Apply(w *World) {
+func (c *commands) apply(w *World) {
 	if len(c.commands) == 0 {
 		return
 	}
 
 	for _, command := range c.commands {
-		command.Execute(w)
+		command.execute(w)
 	}
 
 	c.commands = c.commands[:0]
 }
 
-type SetComponentsCommand struct {
+type setComponentsCommand struct {
 	entity     Entity
 	components []any
 }
 
-func NewSetComponentsCommand(entity Entity, components ...any) *SetComponentsCommand {
-	return &SetComponentsCommand{
+func NewSetComponentsCommand(entity Entity, components ...any) *setComponentsCommand {
+	return &setComponentsCommand{
 		entity:     entity,
 		components: components,
 	}
 }
 
-func (s *SetComponentsCommand) Execute(w *World) {
+func (s *setComponentsCommand) execute(w *World) {
 	w.archetypeAllocator.AddComponents(s.entity, s.components...)
 }
 
-type AddResourceCommand struct {
+type deleteComponentsCommand struct {
+	entity     Entity
+	components []any
+}
+
+func NewDeleteComponentsCommand(entity Entity, components ...any) *deleteComponentsCommand {
+	return &deleteComponentsCommand{
+		entity:     entity,
+		components: components,
+	}
+}
+
+func (d *deleteComponentsCommand) execute(w *World) {
+	w.archetypeAllocator.DeleteComponents(d.entity, d.components...)
+}
+
+type addResourceCommand struct {
 	resource any
 }
 
-func NewAddResourceCommand(resource any) *AddResourceCommand {
-	return &AddResourceCommand{
+func NewAddResourceCommand(resource any) *addResourceCommand {
+	return &addResourceCommand{
 		resource: resource,
 	}
 }
 
-func (a *AddResourceCommand) Execute(w *World) {
+func (a *addResourceCommand) execute(w *World) {
 	w.resources.AddResource(a.resource)
 }
 
-type DespawnCommand struct {
+type despawnCommand struct {
 	entity Entity
 }
 
-func NewDespawnCommand(entity Entity) *DespawnCommand {
-	return &DespawnCommand{
+func NewDespawnCommand(entity Entity) *despawnCommand {
+	return &despawnCommand{
 		entity: entity,
 	}
 }
 
-func (d *DespawnCommand) Execute(w *World) {
-	w.archetypeAllocator.RemoveEntity(d.entity)
-	w.entityAllocator.Delete(d.entity)
+func (d *despawnCommand) execute(w *World) {
+	w.archetypeAllocator.removeEntity(d.entity)
+	w.entityAllocator.delete(d.entity)
 }

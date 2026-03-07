@@ -2,19 +2,19 @@ package zurvan
 
 import "reflect"
 
-type Registry struct {
+type registry struct {
 	registry map[reflect.Type]int
 	counter  int
 }
 
-func NewRegistry() *Registry {
-	return &Registry{
+func newRegistry() *registry {
+	return &registry{
 		registry: make(map[reflect.Type]int),
 		counter:  0,
 	}
 }
 
-func (r *Registry) dataId(dataType reflect.Type) int {
+func (r *registry) dataId(dataType reflect.Type) int {
 	dataId, ok := r.registry[dataType]
 	if !ok {
 		dataId = r.counter
@@ -25,13 +25,13 @@ func (r *Registry) dataId(dataType reflect.Type) int {
 	return dataId
 }
 
-func (r *Registry) DataId(data any) int {
+func (r *registry) dataIdOf(data any) int {
 	dataType := reflect.TypeOf(data)
 
 	return r.dataId(dataType)
 }
 
-func DataIdFor[T any](registry *Registry) int {
+func dataIdFor[T any](registry *registry) int {
 	dataType := reflect.TypeFor[T]()
 
 	return registry.dataId(dataType)

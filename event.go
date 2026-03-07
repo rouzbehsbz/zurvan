@@ -4,39 +4,39 @@ import (
 	"reflect"
 )
 
-type Events struct {
-	columns map[int]Column
+type events struct {
+	columns map[int]column
 
-	registry *Registry
+	registry *registry
 }
 
-func NewEvents(registry *Registry) *Events {
-	return &Events{
-		columns:  make(map[int]Column),
+func newEvents(registry *registry) *events {
+	return &events{
+		columns:  make(map[int]column),
 		registry: registry,
 	}
 }
 
-func (e *Events) Emit(event any) {
-	eventId := e.registry.DataId(event)
+func (e *events) emit(event any) {
+	eventId := e.registry.dataIdOf(event)
 
 	column, ok := e.columns[eventId]
 	if !ok {
-		column = NewVector(reflect.TypeOf(event))
+		column = newVector(reflect.TypeOf(event))
 		e.columns[eventId] = column
 	}
 
-	column.Push(event)
+	column.push(event)
 }
 
-func (e *Events) Clear() {
+func (e *events) Clear() {
 	for _, column := range e.columns {
-		column.Resize(0)
+		column.resize(0)
 	}
 }
 
 func OnEvent[T any](w *World) []T {
-	eventId := DataIdFor[T](w.events.registry)
+	eventId := dataIdFor[T](w.events.registry)
 
 	column, ok := w.events.columns[eventId]
 	if !ok {
