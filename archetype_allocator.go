@@ -37,7 +37,7 @@ type archetypeAllocator struct {
 	registry *registry
 }
 
-func NewArchetypeAllocator(registry *registry) *archetypeAllocator {
+func newArchetypeAllocator(registry *registry) *archetypeAllocator {
 	return &archetypeAllocator{
 		archetypes: make(map[mask]*archetype),
 		locations:  make(map[Entity]entityLocation),
@@ -97,7 +97,7 @@ func (a *archetypeAllocator) addComponents(entity Entity, components ...any) {
 	a.locations[entity] = newEntityLocation(mask, row)
 }
 
-func (a *archetypeAllocator) DeleteComponents(entity Entity, components ...any) {
+func (a *archetypeAllocator) deleteComponents(entity Entity, components ...any) {
 	location, exists := a.locations[entity]
 	if !exists {
 		return
@@ -138,7 +138,7 @@ func (a *archetypeAllocator) DeleteComponents(entity Entity, components ...any) 
 	source.removeEntity(location.row)
 }
 
-func (a *archetypeAllocator) RemoveEntity(entity Entity) {
+func (a *archetypeAllocator) removeEntity(entity Entity) {
 	location := a.locations[entity]
 	archetype := a.archetypes[location.mask]
 
@@ -146,7 +146,7 @@ func (a *archetypeAllocator) RemoveEntity(entity Entity) {
 	delete(a.locations, entity)
 }
 
-func (a *archetypeAllocator) MatchingArchetypes(componentIds ...int) []*archetype {
+func (a *archetypeAllocator) matchingArchetypes(componentIds ...int) []*archetype {
 	archetypes := []*archetype{}
 
 	for mask, archetype := range a.archetypes {

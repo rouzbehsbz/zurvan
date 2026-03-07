@@ -43,7 +43,7 @@ func NewSetComponentsCommand(entity Entity, components ...any) *setComponentsCom
 }
 
 func (s *setComponentsCommand) execute(w *World) {
-	w.archetypeAllocator.AddComponents(s.entity, s.components...)
+	w.archetypeAllocator.addComponents(s.entity, s.components...)
 }
 
 type deleteComponentsCommand struct {
@@ -59,7 +59,7 @@ func NewDeleteComponentsCommand(entity Entity, components ...any) *deleteCompone
 }
 
 func (d *deleteComponentsCommand) execute(w *World) {
-	w.archetypeAllocator.DeleteComponents(d.entity, d.components...)
+	w.archetypeAllocator.deleteComponents(d.entity, d.components...)
 }
 
 type addResourceCommand struct {
@@ -73,7 +73,7 @@ func NewAddResourceCommand(resource any) *addResourceCommand {
 }
 
 func (a *addResourceCommand) execute(w *World) {
-	w.resources.AddResource(a.resource)
+	w.resources.addResource(a.resource)
 }
 
 type despawnCommand struct {

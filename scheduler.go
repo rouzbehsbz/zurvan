@@ -34,7 +34,7 @@ type scheduler struct {
 	accumulator time.Duration
 }
 
-func NewScheduler(commands *commands, events *events, tickRate time.Duration) *scheduler {
+func newScheduler(commands *commands, events *events, tickRate time.Duration) *scheduler {
 	return &scheduler{
 		isRunning:   true,
 		systems:     make(map[Stage][]System),

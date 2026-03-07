@@ -5,57 +5,57 @@ import (
 )
 
 type World struct {
-	entityAllocator    *EntityAllocator
-	archetypeAllocator *ArchetypeAllocator
+	entityAllocator    *entityAllocator
+	archetypeAllocator *archetypeAllocator
 
-	scheduler *Scheduler
-	commands  *Commands
-	events    *Events
-	resources *Resources
+	scheduler *scheduler
+	commands  *commands
+	events    *events
+	resources *resources
 
-	componentRegistry *Registry
+	componentRegistry *registry
 }
 
 func NewWorld(tickRate time.Duration) *World {
-	componentRegistry := NewRegistry()
-	eventRegistry := NewRegistry()
+	componentRegistry := newRegistry()
+	eventRegistry := newRegistry()
 
-	commands := NewCommands()
-	events := NewEvents(eventRegistry)
+	commands := newCommands()
+	events := newEvents(eventRegistry)
 
 	return &World{
-		entityAllocator:    NewEntityAllocator(),
-		archetypeAllocator: NewArchetypeAllocator(componentRegistry),
-		scheduler:          NewScheduler(commands, events, tickRate),
+		entityAllocator:    newEntityAllocator(),
+		archetypeAllocator: newArchetypeAllocator(componentRegistry),
+		scheduler:          newScheduler(commands, events, tickRate),
 		commands:           commands,
 		events:             events,
-		resources:          NewResources(),
+		resources:          newResources(),
 		componentRegistry:  componentRegistry,
 	}
 }
 
 func (w *World) AddSystems(stage Stage, systems []System) {
 	for _, system := range systems {
-		w.scheduler.AddSystem(stage, system)
+		w.scheduler.addSystem(stage, system)
 	}
 }
 
 func (w *World) Spawn() Entity {
-	return w.entityAllocator.Create()
+	return w.entityAllocator.create()
 }
 
-func (w *World) PushCommands(commands ...Command) {
+func (w *World) PushCommands(commands ...command) {
 	for _, command := range commands {
-		w.commands.AddCommand(command)
+		w.commands.addCommand(command)
 	}
 }
 
 func (w *World) EmitEvents(events ...any) {
 	for _, event := range events {
-		w.events.Emit(event)
+		w.events.emit(event)
 	}
 }
 
 func (w *World) Run() {
-	w.scheduler.Run(w)
+	w.scheduler.run(w)
 }

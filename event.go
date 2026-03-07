@@ -43,7 +43,7 @@ func OnEvent[T any](w *World) []T {
 		return []T{}
 	}
 
-	slice := column.AsSlice()
+	slice := column.asSlice()
 
 	return slice.([]T)
 }
