@@ -64,11 +64,11 @@ func (s *scheduler) addSystem(stage Stage, system System) {
 func (s *scheduler) runStage(world *World, stage Stage, dt time.Duration) {
 	systems := s.stage(stage)
 
+	s.commands.apply(world)
+
 	for _, system := range systems {
 		system.Update(world, dt)
 	}
-
-	s.commands.apply(world)
 }
 
 func (s *scheduler) run(world *World) {
