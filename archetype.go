@@ -108,7 +108,8 @@ func (a *archetype) moveComponents(row int, dstRow int, dstArchetype *archetype,
 }
 
 func (a *archetype) column(componentId int) column {
-	entry := a.columns[componentId]
+	index := a.componentIndex[componentId]
+	entry := a.columns[index]
 
 	return entry.column
 }
