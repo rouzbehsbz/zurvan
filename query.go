@@ -85,9 +85,9 @@ func QueryOne1[A any](world *World, entity Entity) *A {
 	}
 
 	column := archetype.column(componentId)
-	data := column.get(row).(A)
+	slice := column.asSlice().([]A)
 
-	return &data
+	return &slice[row]
 }
 
 func QueryOne2[A, B any](world *World, entity Entity) (*A, *B) {
@@ -102,10 +102,10 @@ func QueryOne2[A, B any](world *World, entity Entity) (*A, *B) {
 	columnA := archetype.column(componentAId)
 	columnB := archetype.column(componentBId)
 
-	dataA := columnA.get(row).(A)
-	dataB := columnB.get(row).(B)
+	sliceA := columnA.asSlice().([]A)
+	sliceB := columnB.asSlice().([]B)
 
-	return &dataA, &dataB
+	return &sliceA[row], &sliceB[row]
 }
 
 func QueryOne3[A, B, C any](world *World, entity Entity) (*A, *B, *C) {
@@ -122,11 +122,11 @@ func QueryOne3[A, B, C any](world *World, entity Entity) (*A, *B, *C) {
 	columnB := archetype.column(componentBId)
 	columnC := archetype.column(componentCId)
 
-	dataA := columnA.get(row).(A)
-	dataB := columnB.get(row).(B)
-	dataC := columnC.get(row).(C)
+	sliceA := columnA.asSlice().([]A)
+	sliceB := columnB.asSlice().([]B)
+	sliceC := columnC.asSlice().([]C)
 
-	return &dataA, &dataB, &dataC
+	return &sliceA[row], &sliceB[row], &sliceC[row]
 }
 
 func QueryOne4[A, B, C, D any](world *World, entity Entity) (*A, *B, *C, *D) {
@@ -145,12 +145,12 @@ func QueryOne4[A, B, C, D any](world *World, entity Entity) (*A, *B, *C, *D) {
 	columnC := archetype.column(componentCId)
 	columnD := archetype.column(componentDId)
 
-	dataA := columnA.get(row).(A)
-	dataB := columnB.get(row).(B)
-	dataC := columnC.get(row).(C)
-	dataD := columnD.get(row).(D)
+	sliceA := columnA.asSlice().([]A)
+	sliceB := columnB.asSlice().([]B)
+	sliceC := columnC.asSlice().([]C)
+	sliceD := columnD.asSlice().([]D)
 
-	return &dataA, &dataB, &dataC, &dataD
+	return &sliceA[row], &sliceB[row], &sliceC[row], &sliceD[row]
 }
 
 func QueryOne5[A, B, C, D, E any](world *World, entity Entity) (*A, *B, *C, *D, *E) {
@@ -171,11 +171,11 @@ func QueryOne5[A, B, C, D, E any](world *World, entity Entity) (*A, *B, *C, *D, 
 	columnD := archetype.column(componentDId)
 	columnE := archetype.column(componentEId)
 
-	dataA := columnA.get(row).(A)
-	dataB := columnB.get(row).(B)
-	dataC := columnC.get(row).(C)
-	dataD := columnD.get(row).(D)
-	dataE := columnE.get(row).(E)
+	sliceA := columnA.asSlice().([]A)
+	sliceB := columnB.asSlice().([]B)
+	sliceC := columnC.asSlice().([]C)
+	sliceD := columnD.asSlice().([]D)
+	sliceE := columnE.asSlice().([]E)
 
-	return &dataA, &dataB, &dataC, &dataD, &dataE
+	return &sliceA[row], &sliceB[row], &sliceC[row], &sliceD[row], &sliceE[row]
 }
