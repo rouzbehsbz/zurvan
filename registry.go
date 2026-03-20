@@ -1,7 +1,10 @@
 package zurvan
 
-import "reflect"
+import (
+	"reflect"
+)
 
+// TODO: do we need some sort of locking and syncing mechanism here ?
 type registry struct {
 	registry map[reflect.Type]int
 	counter  int

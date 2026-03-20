@@ -107,9 +107,13 @@ func (a *archetype) moveComponents(row int, dstRow int, dstArchetype *archetype,
 	}
 }
 
-func (a *archetype) column(componentId int) column {
-	index := a.componentIndex[componentId]
+func (a *archetype) column(componentId int) (column, bool) {
+	index, ok := a.componentIndex[componentId]
+	if !ok {
+		return nil, false
+	}
+
 	entry := a.columns[index]
 
-	return entry.column
+	return entry.column, true
 }
