@@ -76,6 +76,63 @@ func QueryMany4[A, B, C, D any](world *World, fn func([]Entity, []A, []B, []C, [
 	}
 }
 
+func QueryMany5[A, B, C, D, E any](world *World, fn func([]Entity, []A, []B, []C, []D, []E)) {
+	componentAId := dataIdFor[A](world.componentRegistry)
+	componentBId := dataIdFor[B](world.componentRegistry)
+	componentCId := dataIdFor[C](world.componentRegistry)
+	componentDId := dataIdFor[D](world.componentRegistry)
+	componentEId := dataIdFor[E](world.componentRegistry)
+
+	archetypes := world.archetypeAllocator.matchingArchetypes(componentAId, componentBId, componentCId, componentDId)
+	for _, archetype := range archetypes {
+		entities := archetype.entities
+
+		columnA, _ := archetype.column(componentAId)
+		columnB, _ := archetype.column(componentBId)
+		columnC, _ := archetype.column(componentCId)
+		columnD, _ := archetype.column(componentDId)
+		columnE, _ := archetype.column(componentEId)
+
+		sliceA := columnA.asSlice().([]A)
+		sliceB := columnB.asSlice().([]B)
+		sliceC := columnC.asSlice().([]C)
+		sliceD := columnD.asSlice().([]D)
+		sliceE := columnE.asSlice().([]E)
+
+		fn(entities, sliceA, sliceB, sliceC, sliceD, sliceE)
+	}
+}
+
+func QueryMany6[A, B, C, D, E, F any](world *World, fn func([]Entity, []A, []B, []C, []D, []E, []F)) {
+	componentAId := dataIdFor[A](world.componentRegistry)
+	componentBId := dataIdFor[B](world.componentRegistry)
+	componentCId := dataIdFor[C](world.componentRegistry)
+	componentDId := dataIdFor[D](world.componentRegistry)
+	componentEId := dataIdFor[E](world.componentRegistry)
+	componentFId := dataIdFor[F](world.componentRegistry)
+
+	archetypes := world.archetypeAllocator.matchingArchetypes(componentAId, componentBId, componentCId, componentDId)
+	for _, archetype := range archetypes {
+		entities := archetype.entities
+
+		columnA, _ := archetype.column(componentAId)
+		columnB, _ := archetype.column(componentBId)
+		columnC, _ := archetype.column(componentCId)
+		columnD, _ := archetype.column(componentDId)
+		columnE, _ := archetype.column(componentEId)
+		columnF, _ := archetype.column(componentFId)
+
+		sliceA := columnA.asSlice().([]A)
+		sliceB := columnB.asSlice().([]B)
+		sliceC := columnC.asSlice().([]C)
+		sliceD := columnD.asSlice().([]D)
+		sliceE := columnE.asSlice().([]E)
+		sliceF := columnF.asSlice().([]F)
+
+		fn(entities, sliceA, sliceB, sliceC, sliceD, sliceE, sliceF)
+	}
+}
+
 func QueryOne1[A any](world *World, entity Entity) *A {
 	componentId := dataIdFor[A](world.componentRegistry)
 

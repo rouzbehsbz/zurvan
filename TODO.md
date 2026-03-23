@@ -1,2 +1,4 @@
 - The entity allocator uses a mutex for thread safety and needs to be rewritten using a better lock-free algorithm.
 - Provide a way to define bundles of components for entities.
+- Use channels in event system
+- Use channels in command system
