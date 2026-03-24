@@ -252,3 +252,36 @@ func QueryOne5[A, B, C, D, E any](world *World, entity Entity) (*A, *B, *C, *D, 
 
 	return &sliceA[row], &sliceB[row], &sliceC[row], &sliceD[row], &sliceE[row]
 }
+
+func QueryOne6[A, B, C, D, E, F any](world *World, entity Entity) (*A, *B, *C, *D, *E, *F) {
+	componentAId := dataIdFor[A](world.componentRegistry)
+	componentBId := dataIdFor[B](world.componentRegistry)
+	componentCId := dataIdFor[C](world.componentRegistry)
+	componentDId := dataIdFor[D](world.componentRegistry)
+	componentEId := dataIdFor[E](world.componentRegistry)
+	componentFId := dataIdFor[F](world.componentRegistry)
+
+	archetype, row := world.archetypeAllocator.matchingArchetype(entity)
+	if archetype == nil || row == -1 {
+		return nil, nil, nil, nil, nil, nil
+	}
+
+	columnA, ok := archetype.column(componentAId)
+	columnB, ok := archetype.column(componentBId)
+	columnC, ok := archetype.column(componentCId)
+	columnD, ok := archetype.column(componentDId)
+	columnE, ok := archetype.column(componentEId)
+	columnF, ok := archetype.column(componentFId)
+	if !ok {
+		return nil, nil, nil, nil, nil, nil
+	}
+
+	sliceA := columnA.asSlice().([]A)
+	sliceB := columnB.asSlice().([]B)
+	sliceC := columnC.asSlice().([]C)
+	sliceD := columnD.asSlice().([]D)
+	sliceE := columnE.asSlice().([]E)
+	sliceF := columnF.asSlice().([]F)
+
+	return &sliceA[row], &sliceB[row], &sliceC[row], &sliceD[row], &sliceE[row], &sliceF[row]
+}
