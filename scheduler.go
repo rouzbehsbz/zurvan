@@ -11,7 +11,6 @@ const (
 	PreUpdateStage
 	FixedUpdateStage
 	UpdateStage
-	PostUpdateStage
 	EndStage
 )
 
@@ -91,7 +90,6 @@ func (s *scheduler) run(world *World) {
 		}
 
 		s.runStage(world, UpdateStage, frameTime)
-		s.runStage(world, PostUpdateStage, frameTime)
 
 		s.events.Clear()
 
