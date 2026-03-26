@@ -38,19 +38,20 @@ type Velocity struct {
 	X, Y float64
 }
 
+type Zone struct {
+	Id int
+}
+
 type DeathEvent struct {
 	Entity zurvan.Entity
 }
 
 type MovementSystem struct{}
 
-func (m *MovementSystem) Stage() zurvan.Stage {
-	return zurvan.UpdateStage
-}
 func (m *MovementSystem) Update(w *zurvan.World, dt time.Duration) {
 	sec := dt.Seconds()
 
-	zurvan.QueryMany2[Position, Velocity](w, func(entities []zurvan.Entity, p []Position, v []Velocity) {
+	zurvan.QueryMany2(w, func(entities []zurvan.Entity, p []Position, v []Velocity) {
 		for i, e := range entities {
 			p[i].X += v[i].X * sec
 			p[i].Y += v[i].Y * sec
@@ -70,9 +71,6 @@ func (m *MovementSystem) Update(w *zurvan.World, dt time.Duration) {
 
 type RespawnSystem struct{}
 
-func (m *RespawnSystem) Stage() zurvan.Stage {
-	return zurvan.UpdateStage
-}
 func (m *RespawnSystem) Update(w *zurvan.World, dt time.Duration) {
 	events := zurvan.OnEvent[DeathEvent](w)
 

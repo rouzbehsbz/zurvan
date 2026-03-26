@@ -1,3 +1,4 @@
 - The entity allocator uses a mutex for thread safety and needs to be rewritten using a better lock-free algorithm.
 - Provide a way to define bundles of components for entities.
 - Use channels in event system
+- Maybe we can use lock free algorithm for registry too
