@@ -1,13 +1,11 @@
 package zurvan
 
 type Entity struct {
-	Index      int
-	Generation int
+	Index uint32
 }
 
-func newEntity(index, generation int) Entity {
+func newEntity(index uint32) Entity {
 	return Entity{
-		Index:      index,
-		Generation: generation,
+		Index: index,
 	}
 }

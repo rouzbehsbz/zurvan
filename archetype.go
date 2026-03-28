@@ -45,16 +45,6 @@ func newArchetype(entries []componentEntry) *archetype {
 	}
 }
 
-func (a *archetype) isEntityAlive(entity Entity, row int) bool {
-	if row >= len(a.entities) {
-		return false
-	}
-
-	e := a.entities[row]
-
-	return e.Index == entity.Index && e.Generation == entity.Generation
-}
-
 func (a *archetype) addEntity(entity Entity) int {
 	row := len(a.entities)
 	a.entities = append(a.entities, entity)

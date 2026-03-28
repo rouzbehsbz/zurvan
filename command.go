@@ -85,5 +85,4 @@ func NewDespawnCommand(entity Entity) *despawnCommand {
 
 func (d *despawnCommand) execute(w *World) {
 	w.archetypeAllocator.removeEntity(d.entity)
-	w.entityAllocator.delete(d.entity)
 }
