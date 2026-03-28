@@ -160,11 +160,8 @@ func QueryOne2[A, B any](world *World, entity Entity) (*A, *B) {
 		return nil, nil
 	}
 
-	columnA, ok := archetype.column(componentAId)
-	columnB, ok := archetype.column(componentBId)
-	if !ok {
-		return nil, nil
-	}
+	columnA, _ := archetype.column(componentAId)
+	columnB, _ := archetype.column(componentBId)
 
 	sliceA := columnA.asSlice().([]A)
 	sliceB := columnB.asSlice().([]B)
@@ -182,12 +179,9 @@ func QueryOne3[A, B, C any](world *World, entity Entity) (*A, *B, *C) {
 		return nil, nil, nil
 	}
 
-	columnA, ok := archetype.column(componentAId)
-	columnB, ok := archetype.column(componentBId)
-	columnC, ok := archetype.column(componentCId)
-	if !ok {
-		return nil, nil, nil
-	}
+	columnA, _ := archetype.column(componentAId)
+	columnB, _ := archetype.column(componentBId)
+	columnC, _ := archetype.column(componentCId)
 
 	sliceA := columnA.asSlice().([]A)
 	sliceB := columnB.asSlice().([]B)
@@ -235,14 +229,11 @@ func QueryOne5[A, B, C, D, E any](world *World, entity Entity) (*A, *B, *C, *D, 
 		return nil, nil, nil, nil, nil
 	}
 
-	columnA, ok := archetype.column(componentAId)
-	columnB, ok := archetype.column(componentBId)
-	columnC, ok := archetype.column(componentCId)
-	columnD, ok := archetype.column(componentDId)
-	columnE, ok := archetype.column(componentEId)
-	if !ok {
-		return nil, nil, nil, nil, nil
-	}
+	columnA, _ := archetype.column(componentAId)
+	columnB, _ := archetype.column(componentBId)
+	columnC, _ := archetype.column(componentCId)
+	columnD, _ := archetype.column(componentDId)
+	columnE, _ := archetype.column(componentEId)
 
 	sliceA := columnA.asSlice().([]A)
 	sliceB := columnB.asSlice().([]B)
@@ -266,15 +257,12 @@ func QueryOne6[A, B, C, D, E, F any](world *World, entity Entity) (*A, *B, *C, *
 		return nil, nil, nil, nil, nil, nil
 	}
 
-	columnA, ok := archetype.column(componentAId)
-	columnB, ok := archetype.column(componentBId)
-	columnC, ok := archetype.column(componentCId)
-	columnD, ok := archetype.column(componentDId)
-	columnE, ok := archetype.column(componentEId)
-	columnF, ok := archetype.column(componentFId)
-	if !ok {
-		return nil, nil, nil, nil, nil, nil
-	}
+	columnA, _ := archetype.column(componentAId)
+	columnB, _ := archetype.column(componentBId)
+	columnC, _ := archetype.column(componentCId)
+	columnD, _ := archetype.column(componentDId)
+	columnE, _ := archetype.column(componentEId)
+	columnF, _ := archetype.column(componentFId)
 
 	sliceA := columnA.asSlice().([]A)
 	sliceB := columnB.asSlice().([]B)

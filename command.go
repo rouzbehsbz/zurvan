@@ -21,7 +21,9 @@ func (c *commands) addCommand(command command) {
 }
 
 func (c *commands) apply(w *World) {
-	for len(c.commands) > 0 {
+	length := len(c.commands)
+
+	for range length {
 		command := <-c.commands
 		command.execute(w)
 	}
