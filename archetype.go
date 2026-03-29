@@ -57,14 +57,21 @@ func (a *archetype) addEntity(entity Entity) int {
 }
 
 func (a *archetype) removeEntity(row int) (Entity, int) {
+	var swapped Entity
+	var swappedRow int = -1
+
 	length := len(a.entities)
 	if row >= length {
-		return Entity{}, -1
+		return swapped, swappedRow
 	}
 
 	lastIndex := length - 1
-	swapped := a.entities[lastIndex]
-	a.entities[row] = swapped
+
+	if row != lastIndex {
+		swapped = a.entities[lastIndex]
+		a.entities[row] = swapped
+		swappedRow = row
+	}
 
 	a.entities = a.entities[:lastIndex]
 
@@ -72,11 +79,7 @@ func (a *archetype) removeEntity(row int) (Entity, int) {
 		entry.column.remove(row)
 	}
 
-	if row != lastIndex {
-		return swapped, row
-	}
-
-	return Entity{}, -1
+	return swapped, swappedRow
 }
 
 func (a *archetype) addComponent(row int, componentId int, component any) {
