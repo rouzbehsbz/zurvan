@@ -93,7 +93,13 @@ func (a *archetypeAllocator) addComponents(entity Entity, components ...any) {
 
 		a.setComponents(target, newRow, components)
 		source.moveComponents(location.row, newRow, target)
-		source.removeEntity(location.row)
+		swappedEntity, swappedRow := source.removeEntity(location.row)
+
+		if swappedRow != -1 {
+			swLocation := a.locations[swappedEntity]
+			swLocation.row = swappedRow
+			a.locations[swappedEntity] = swLocation
+		}
 
 		a.locations[entity] = newEntityLocation(newMask, newRow)
 		return
@@ -159,17 +165,33 @@ func (a *archetypeAllocator) deleteComponents(entity Entity, components ...any) 
 
 	row := target.addEntity(entity)
 	source.moveComponents(location.row, row, target, excludeCompIds...)
-	source.removeEntity(location.row)
+	swappedEntity, swappedRow := source.removeEntity(location.row)
+
+	if swappedRow != -1 {
+		swLocation := a.locations[swappedEntity]
+		swLocation.row = swappedRow
+		a.locations[swappedEntity] = swLocation
+	}
 
 	a.locations[entity] = newEntityLocation(mask, row)
 }
 
 func (a *archetypeAllocator) removeEntity(entity Entity) {
-	location := a.locations[entity]
+	location, ok := a.locations[entity]
+	if !ok {
+		return
+	}
+
 	archetype := a.archetypes[location.mask]
 
-	archetype.removeEntity(location.row)
+	swappedEntity, swappedRow := archetype.removeEntity(location.row)
 	delete(a.locations, entity)
+
+	if swappedRow != -1 {
+		swLocation := a.locations[swappedEntity]
+		swLocation.row = swappedRow
+		a.locations[swappedEntity] = swLocation
+	}
 }
 
 func (a *archetypeAllocator) matchingArchetypes(componentIds ...int) []*archetype {

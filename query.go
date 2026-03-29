@@ -83,7 +83,7 @@ func QueryMany5[A, B, C, D, E any](world *World, fn func([]Entity, []A, []B, []C
 	componentDId := dataIdFor[D](world.componentRegistry)
 	componentEId := dataIdFor[E](world.componentRegistry)
 
-	archetypes := world.archetypeAllocator.matchingArchetypes(componentAId, componentBId, componentCId, componentDId)
+	archetypes := world.archetypeAllocator.matchingArchetypes(componentAId, componentBId, componentCId, componentDId, componentEId)
 	for _, archetype := range archetypes {
 		entities := archetype.entities
 
@@ -111,7 +111,7 @@ func QueryMany6[A, B, C, D, E, F any](world *World, fn func([]Entity, []A, []B, 
 	componentEId := dataIdFor[E](world.componentRegistry)
 	componentFId := dataIdFor[F](world.componentRegistry)
 
-	archetypes := world.archetypeAllocator.matchingArchetypes(componentAId, componentBId, componentCId, componentDId)
+	archetypes := world.archetypeAllocator.matchingArchetypes(componentAId, componentBId, componentCId, componentDId, componentEId, componentFId)
 	for _, archetype := range archetypes {
 		entities := archetype.entities
 
@@ -141,11 +141,7 @@ func QueryOne1[A any](world *World, entity Entity) *A {
 		return nil
 	}
 
-	column, ok := archetype.column(componentId)
-	if !ok {
-		return nil
-	}
-
+	column, _ := archetype.column(componentId)
 	slice := column.asSlice().([]A)
 
 	return &slice[row]

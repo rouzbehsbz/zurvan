@@ -13,21 +13,19 @@ func newVector(elemType reflect.Type) *vector {
 }
 
 func (v *vector) resize(length int) {
-	current := v.data.Len()
-
-	if length <= current {
+	if length <= v.data.Len() {
 		v.data = v.data.Slice(0, length)
 		return
 	}
 
-	elemType := v.data.Type().Elem()
-	extra := reflect.MakeSlice(
-		reflect.SliceOf(elemType),
-		length-current,
-		length-current,
-	)
+	newCap := length
+	newLen := length
 
-	v.data = reflect.AppendSlice(v.data, extra)
+	newSlice := reflect.MakeSlice(v.data.Type(), newLen, newCap)
+
+	reflect.Copy(newSlice, v.data)
+
+	v.data = newSlice
 }
 
 func (v *vector) len() int {
