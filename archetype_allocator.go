@@ -140,8 +140,15 @@ func (a *archetypeAllocator) deleteComponents(entity Entity, components ...any) 
 
 	for _, c := range components {
 		id := a.registry.dataIdOf(c)
-		mask &= ^maskBit(id)
-		excludeCompIds = append(excludeCompIds, id)
+
+		if maskHasComponents(mask, maskBit(id)) {
+			mask &= ^maskBit(id)
+			excludeCompIds = append(excludeCompIds, id)
+		}
+	}
+
+	if mask == location.mask {
+		return
 	}
 
 	source := a.archetypes[location.mask]
