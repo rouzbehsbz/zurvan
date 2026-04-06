@@ -1,6 +1,6 @@
 package zurvan
 
-const CommandBufferSize int = 1024
+const commandBufferSize int = 1024
 
 type command interface {
 	execute(w *World)
@@ -12,7 +12,7 @@ type commands struct {
 
 func newCommands() *commands {
 	return &commands{
-		commands: make(chan command, CommandBufferSize),
+		commands: make(chan command, commandBufferSize),
 	}
 }
 

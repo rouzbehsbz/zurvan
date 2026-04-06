@@ -4,7 +4,10 @@ import (
 	"reflect"
 )
 
+const eventBufferSize int = 1024
+
 type events struct {
+	events  chan any
 	columns map[int]column
 
 	registry *registry
@@ -12,24 +15,32 @@ type events struct {
 
 func newEvents(registry *registry) *events {
 	return &events{
+		events:   make(chan any, eventBufferSize),
 		columns:  make(map[int]column),
 		registry: registry,
 	}
 }
 
 func (e *events) emit(event any) {
-	eventId := e.registry.dataIdOf(event)
-
-	column, ok := e.columns[eventId]
-	if !ok {
-		column = newVector(reflect.TypeOf(event))
-		e.columns[eventId] = column
-	}
-
-	column.push(event)
+	e.events <- event
 }
 
-func (e *events) Clear() {
+func (e *events) apply() {
+	for len(e.events) > 0 {
+		event := <-e.events
+
+		eventId := e.registry.dataIdOf(event)
+		column, ok := e.columns[eventId]
+		if !ok {
+			column = newVector(reflect.TypeOf(event))
+			e.columns[eventId] = column
+		}
+
+		column.push(event)
+	}
+}
+
+func (e *events) clear() {
 	for _, column := range e.columns {
 		column.resize(0)
 	}
