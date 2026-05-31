@@ -17,8 +17,10 @@ func (m *MovementSystem) Update(w *zurvan.World, dt time.Duration) {
 	dt := dt.Seconds()
 
 	zurvan.QueryMany2(w, func(e []zurvan.Entity, p []Position, v []Velocity) {
-		p[i].X += v[i].X * dt
-		p[i].Y += v[i].Y * dt
+		for i, e := range entities {
+			p[i].X += v[i].X * sec
+			p[i].Y += v[i].Y * sec
+		}
 	})
 }
 ```
