@@ -32,6 +32,8 @@ type setComponentsCommand struct {
 	components []any
 }
 
+// Set or assign components to an existing entity
+// If the entity already has a componenet of the same type, it will be replaced with the new one
 func NewSetComponentsCommand(entity Entity, components ...any) *setComponentsCommand {
 	return &setComponentsCommand{
 		entity:     entity,
@@ -48,6 +50,7 @@ type deleteComponentsCommand struct {
 	components []any
 }
 
+// Delete components from an existing entity
 func NewDeleteComponentsCommand(entity Entity, components ...any) *deleteComponentsCommand {
 	return &deleteComponentsCommand{
 		entity:     entity,
@@ -63,6 +66,8 @@ type addResourceCommand struct {
 	resource any
 }
 
+// Add or assign a resource to the world
+// If the world already has a resource of the same type, it will be replaced with the new one
 func NewAddResourceCommand(resource any) *addResourceCommand {
 	return &addResourceCommand{
 		resource: resource,
@@ -77,6 +82,10 @@ type despawnCommand struct {
 	entity Entity
 }
 
+// Despawn an existing entity from the world,
+//
+// Limitations:
+//   - Right now the index of the despawned entity will not be reused
 func NewDespawnCommand(entity Entity) *despawnCommand {
 	return &despawnCommand{
 		entity: entity,

@@ -1,5 +1,10 @@
 package zurvan
 
+// Querying entities with a single component
+//
+// Iterates over all entities that have a component(s) of the specified type(s)
+// The provided slices are aligned by index, for any index i, entities[i] owns
+// components stored at index i in each component slice.
 func QueryMany1[A any](world *World, fn func([]Entity, []A)) {
 	componentId := dataIdFor[A](world.componentRegistry)
 
@@ -13,6 +18,11 @@ func QueryMany1[A any](world *World, fn func([]Entity, []A)) {
 	}
 }
 
+// Querying entities with two components
+//
+// Iterates over all entities that have a component(s) of the specified type(s)
+// The provided slices are aligned by index, for any index i, entities[i] owns
+// components stored at index i in each component slice.
 func QueryMany2[A, B any](world *World, fn func([]Entity, []A, []B)) {
 	componentAId := dataIdFor[A](world.componentRegistry)
 	componentBId := dataIdFor[B](world.componentRegistry)
@@ -31,6 +41,11 @@ func QueryMany2[A, B any](world *World, fn func([]Entity, []A, []B)) {
 	}
 }
 
+// Querying entities with three components
+//
+// Iterates over all entities that have a component(s) of the specified type(s)
+// The provided slices are aligned by index, for any index i, entities[i] owns
+// components stored at index i in each component slice.
 func QueryMany3[A, B, C any](world *World, fn func([]Entity, []A, []B, []C)) {
 	componentAId := dataIdFor[A](world.componentRegistry)
 	componentBId := dataIdFor[B](world.componentRegistry)
@@ -52,6 +67,11 @@ func QueryMany3[A, B, C any](world *World, fn func([]Entity, []A, []B, []C)) {
 	}
 }
 
+// Querying entities with four components
+//
+// Iterates over all entities that have a component(s) of the specified type(s)
+// The provided slices are aligned by index, for any index i, entities[i] owns
+// components stored at index i in each component slice.
 func QueryMany4[A, B, C, D any](world *World, fn func([]Entity, []A, []B, []C, []D)) {
 	componentAId := dataIdFor[A](world.componentRegistry)
 	componentBId := dataIdFor[B](world.componentRegistry)
@@ -76,6 +96,11 @@ func QueryMany4[A, B, C, D any](world *World, fn func([]Entity, []A, []B, []C, [
 	}
 }
 
+// Querying entities with five components
+//
+// Iterates over all entities that have a component(s) of the specified type(s)
+// The provided slices are aligned by index, for any index i, entities[i] owns
+// components stored at index i in each component slice.
 func QueryMany5[A, B, C, D, E any](world *World, fn func([]Entity, []A, []B, []C, []D, []E)) {
 	componentAId := dataIdFor[A](world.componentRegistry)
 	componentBId := dataIdFor[B](world.componentRegistry)
@@ -103,6 +128,11 @@ func QueryMany5[A, B, C, D, E any](world *World, fn func([]Entity, []A, []B, []C
 	}
 }
 
+// Querying entities with six components
+//
+// Iterates over all entities that have a component(s) of the specified type(s)
+// The provided slices are aligned by index, for any index i, entities[i] owns
+// components stored at index i in each component slice.
 func QueryMany6[A, B, C, D, E, F any](world *World, fn func([]Entity, []A, []B, []C, []D, []E, []F)) {
 	componentAId := dataIdFor[A](world.componentRegistry)
 	componentBId := dataIdFor[B](world.componentRegistry)
@@ -133,226 +163,113 @@ func QueryMany6[A, B, C, D, E, F any](world *World, fn func([]Entity, []A, []B, 
 	}
 }
 
+// Querying a single entity with one component
+//
+// Returns a pointer to the component if the entity has it, otherwise returns nil
 func QueryOne1[A any](world *World, entity Entity) *A {
 	archetype, row := world.archetypeAllocator.matchingArchetype(entity)
 	if archetype == nil || row == -1 {
 		return nil
 	}
 
-	componentId := dataIdFor[A](world.componentRegistry)
+	resultA := componentPtr[A](world, archetype, row)
 
-	column, ok := archetype.column(componentId)
-
-	var result *A
-	if ok {
-		slice := column.asSlice().([]A)
-		result = &slice[row]
-	}
-
-	return result
+	return resultA
 }
 
+// Querying a single entity with two components
+//
+// Returns pointers to the components if the entity has them, otherwise returns nil
 func QueryOne2[A, B any](world *World, entity Entity) (*A, *B) {
 	archetype, row := world.archetypeAllocator.matchingArchetype(entity)
 	if archetype == nil || row == -1 {
 		return nil, nil
 	}
 
-	componentAId := dataIdFor[A](world.componentRegistry)
-	componentBId := dataIdFor[B](world.componentRegistry)
-
-	columnA, okA := archetype.column(componentAId)
-	columnB, okB := archetype.column(componentBId)
-
-	var resultA *A
-	var resultB *B
-
-	if okA {
-		sliceA := columnA.asSlice().([]A)
-		resultA = &sliceA[row]
-	}
-	if okB {
-		sliceB := columnB.asSlice().([]B)
-		resultB = &sliceB[row]
-	}
+	resultA := componentPtr[A](world, archetype, row)
+	resultB := componentPtr[B](world, archetype, row)
 
 	return resultA, resultB
 }
 
+// Querying a single entity with three components
+//
+// Returns pointers to the components if the entity has them, otherwise returns nil
 func QueryOne3[A, B, C any](world *World, entity Entity) (*A, *B, *C) {
 	archetype, row := world.archetypeAllocator.matchingArchetype(entity)
 	if archetype == nil || row == -1 {
 		return nil, nil, nil
 	}
 
-	componentAId := dataIdFor[A](world.componentRegistry)
-	componentBId := dataIdFor[B](world.componentRegistry)
-	componentCId := dataIdFor[C](world.componentRegistry)
-
-	columnA, okA := archetype.column(componentAId)
-	columnB, okB := archetype.column(componentBId)
-	columnC, okC := archetype.column(componentCId)
-
-	var resultA *A
-	var resultB *B
-	var resultC *C
-
-	if okA {
-		sliceA := columnA.asSlice().([]A)
-		resultA = &sliceA[row]
-	}
-	if okB {
-		sliceB := columnB.asSlice().([]B)
-		resultB = &sliceB[row]
-	}
-	if okC {
-		sliceC := columnC.asSlice().([]C)
-		resultC = &sliceC[row]
-	}
+	resultA := componentPtr[A](world, archetype, row)
+	resultB := componentPtr[B](world, archetype, row)
+	resultC := componentPtr[C](world, archetype, row)
 
 	return resultA, resultB, resultC
 }
 
+// Querying a single entity with four components
+//
+// Returns pointers to the components if the entity has them, otherwise returns nil
 func QueryOne4[A, B, C, D any](world *World, entity Entity) (*A, *B, *C, *D) {
 	archetype, row := world.archetypeAllocator.matchingArchetype(entity)
 	if archetype == nil || row == -1 {
 		return nil, nil, nil, nil
 	}
 
-	componentAId := dataIdFor[A](world.componentRegistry)
-	componentBId := dataIdFor[B](world.componentRegistry)
-	componentCId := dataIdFor[C](world.componentRegistry)
-	componentDId := dataIdFor[D](world.componentRegistry)
-
-	columnA, okA := archetype.column(componentAId)
-	columnB, okB := archetype.column(componentBId)
-	columnC, okC := archetype.column(componentCId)
-	columnD, okD := archetype.column(componentDId)
-
-	var resultA *A
-	var resultB *B
-	var resultC *C
-	var resultD *D
-
-	if okA {
-		sliceA := columnA.asSlice().([]A)
-		resultA = &sliceA[row]
-	}
-	if okB {
-		sliceB := columnB.asSlice().([]B)
-		resultB = &sliceB[row]
-	}
-	if okC {
-		sliceC := columnC.asSlice().([]C)
-		resultC = &sliceC[row]
-	}
-	if okD {
-		sliceD := columnD.asSlice().([]D)
-		resultD = &sliceD[row]
-	}
+	resultA := componentPtr[A](world, archetype, row)
+	resultB := componentPtr[B](world, archetype, row)
+	resultC := componentPtr[C](world, archetype, row)
+	resultD := componentPtr[D](world, archetype, row)
 
 	return resultA, resultB, resultC, resultD
 }
 
+// Querying a single entity with five components
+//
+// Returns pointers to the components if the entity has them, otherwise returns nil
 func QueryOne5[A, B, C, D, E any](world *World, entity Entity) (*A, *B, *C, *D, *E) {
 	archetype, row := world.archetypeAllocator.matchingArchetype(entity)
 	if archetype == nil || row == -1 {
 		return nil, nil, nil, nil, nil
 	}
 
-	componentAId := dataIdFor[A](world.componentRegistry)
-	componentBId := dataIdFor[B](world.componentRegistry)
-	componentCId := dataIdFor[C](world.componentRegistry)
-	componentDId := dataIdFor[D](world.componentRegistry)
-	componentEId := dataIdFor[E](world.componentRegistry)
-
-	columnA, okA := archetype.column(componentAId)
-	columnB, okB := archetype.column(componentBId)
-	columnC, okC := archetype.column(componentCId)
-	columnD, okD := archetype.column(componentDId)
-	columnE, okE := archetype.column(componentEId)
-
-	var resultA *A
-	var resultB *B
-	var resultC *C
-	var resultD *D
-	var resultE *E
-
-	if okA {
-		sliceA := columnA.asSlice().([]A)
-		resultA = &sliceA[row]
-	}
-	if okB {
-		sliceB := columnB.asSlice().([]B)
-		resultB = &sliceB[row]
-	}
-	if okC {
-		sliceC := columnC.asSlice().([]C)
-		resultC = &sliceC[row]
-	}
-	if okD {
-		sliceD := columnD.asSlice().([]D)
-		resultD = &sliceD[row]
-	}
-	if okE {
-		sliceE := columnE.asSlice().([]E)
-		resultE = &sliceE[row]
-	}
+	resultA := componentPtr[A](world, archetype, row)
+	resultB := componentPtr[B](world, archetype, row)
+	resultC := componentPtr[C](world, archetype, row)
+	resultD := componentPtr[D](world, archetype, row)
+	resultE := componentPtr[E](world, archetype, row)
 
 	return resultA, resultB, resultC, resultD, resultE
 }
 
+// Querying a single entity with six components
+//
+// Returns pointers to the components if the entity has them, otherwise returns nil
 func QueryOne6[A, B, C, D, E, F any](world *World, entity Entity) (*A, *B, *C, *D, *E, *F) {
 	archetype, row := world.archetypeAllocator.matchingArchetype(entity)
 	if archetype == nil || row == -1 {
 		return nil, nil, nil, nil, nil, nil
 	}
 
-	componentAId := dataIdFor[A](world.componentRegistry)
-	componentBId := dataIdFor[B](world.componentRegistry)
-	componentCId := dataIdFor[C](world.componentRegistry)
-	componentDId := dataIdFor[D](world.componentRegistry)
-	componentEId := dataIdFor[E](world.componentRegistry)
-	componentFId := dataIdFor[F](world.componentRegistry)
-
-	columnA, okA := archetype.column(componentAId)
-	columnB, okB := archetype.column(componentBId)
-	columnC, okC := archetype.column(componentCId)
-	columnD, okD := archetype.column(componentDId)
-	columnE, okE := archetype.column(componentEId)
-	columnF, okF := archetype.column(componentFId)
-
-	var resultA *A
-	var resultB *B
-	var resultC *C
-	var resultD *D
-	var resultE *E
-	var resultF *F
-
-	if okA {
-		sliceA := columnA.asSlice().([]A)
-		resultA = &sliceA[row]
-	}
-	if okB {
-		sliceB := columnB.asSlice().([]B)
-		resultB = &sliceB[row]
-	}
-	if okC {
-		sliceC := columnC.asSlice().([]C)
-		resultC = &sliceC[row]
-	}
-	if okD {
-		sliceD := columnD.asSlice().([]D)
-		resultD = &sliceD[row]
-	}
-	if okE {
-		sliceE := columnE.asSlice().([]E)
-		resultE = &sliceE[row]
-	}
-	if okF {
-		sliceF := columnF.asSlice().([]F)
-		resultF = &sliceF[row]
-	}
+	resultA := componentPtr[A](world, archetype, row)
+	resultB := componentPtr[B](world, archetype, row)
+	resultC := componentPtr[C](world, archetype, row)
+	resultD := componentPtr[D](world, archetype, row)
+	resultE := componentPtr[E](world, archetype, row)
+	resultF := componentPtr[F](world, archetype, row)
 
 	return resultA, resultB, resultC, resultD, resultE, resultF
+}
+
+func componentPtr[T any](world *World, archetype *archetype, row int) *T {
+	componentId := dataIdFor[T](world.componentRegistry)
+
+	column, ok := archetype.column(componentId)
+	if !ok {
+		return nil
+	}
+
+	slice := column.asSlice().([]T)
+	return &slice[row]
 }

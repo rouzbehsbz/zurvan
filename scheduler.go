@@ -4,20 +4,34 @@ import (
 	"time"
 )
 
+// Stage represents a phase in the execution of systems.
+// Systems can be added to different stages to control their execution order.
 type Stage = uint8
 
 const (
+	// Runs once at the start of the world
 	StartupStage Stage = iota
+
+	// Runs every frame, before FixedUpdateStage
 	PreUpdateStage
+
+	// Runs at a fixed tick rate, independent of frame rate
 	FixedUpdateStage
+
+	// Runs every frame, after FixedUpdateStage
 	UpdateStage
+
+	// Runs once at the end of the world
 	EndStage
 )
 
+// System represents a unit of logic that operates on the world.
+// Systems are executed in stages, and can be added to multiple stages if needed.
 type System interface {
 	Update(w *World, dt time.Duration)
 }
 
+// Helper function to build a stage with its associated systems.
 func BuildStageSystems(stage Stage, systems ...System) (Stage, []System) {
 	return stage, systems
 }

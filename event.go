@@ -46,6 +46,7 @@ func (e *events) clear() {
 	}
 }
 
+// Returns a slice of events of type T that were emitted during the current frame
 func OnEvent[T any](w *World) []T {
 	eventId := dataIdFor[T](w.events.registry)
 

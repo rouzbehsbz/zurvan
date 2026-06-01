@@ -21,6 +21,7 @@ func (r *resources) addResource(resource any) {
 	r.storage[resourceId] = resource
 }
 
+// Returns the resource of type T if it exists, and a boolean indicating whether it was found
 func Resource[T any](w *World) (T, bool) {
 	resourceId := dataIdFor[T](w.resources.registry)
 
