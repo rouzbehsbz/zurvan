@@ -24,3 +24,98 @@ func (m *MovementSystem) Update(w *zurvan.World, dt time.Duration) {
 	})
 }
 ```
+
+## Concepts
+
+### Entity
+It is simply a unique identifier that represents an object in the world. you can define a player or a bullet or any object that can have some property and behavior as an entity.
+
+```go
+player := world.Spawn()
+bullet := world.Spawn()
+```
+
+### Component
+Components contain data only, no behavior or logic associated to them. you can set, or delete components for spawned entities in your world.
+
+```go
+type Position struct {
+	X, Y float64
+}
+
+type Health struct {
+	Value int
+}
+```
+
+### System
+A system contains the logic that operates on components. you can query entities that match a specific set of components or query an exact entity for retrieving its components and read or update them. Systems execute in the order and stage they were added during each loop.
+
+```go
+type MovementSystem struct {}
+
+func (m *MovementSystem) Update(w *zurvan.World, dt time.Duration) {
+	dt := dt.Seconds()
+
+	zurvan.QueryMany2(w, func(e []zurvan.Entity, p []Position, v []Velocity) {
+		for i, e := range entities {
+			p[i].X += v[i].X * sec
+			p[i].Y += v[i].Y * sec
+		}
+	})
+}
+```
+
+### Command
+Despawning an entity, adding or removing components, and managing resources can be executed as commands. For system reliability in every tick or frame, these operations are applied at the end of each system. This ensures they are atomic and that the next stage operates on a consistent state.
+
+```go
+w.PushCommands(
+	zurvan.NewSetComponentsCommand(player,
+		Position{X: 10, Y: 10},
+		Velocity{X: 2, Y: 2},
+	),
+)
+```
+
+### Resource
+A resource is a globally shared piece of state that can be accessed from anywhere in the world, such as configuration, time or global game state.
+
+```go
+// Register a new resource
+
+type Players struct {
+	Map map[int]zurvan.Entity
+}
+
+players := &Players{}
+
+world.PushCommands(
+	zurvan.NewAddResourceCommand(players),
+)
+
+// Getting a registered resource by its type
+
+zurvan.Resource[*Players](world)
+```
+
+### Event
+An event is a message that represents something that happened during a single tick. It can be emitted and should be consumed within the same tick by upstream systems. At the end of the tick, all events are cleared. Events are used for decoupling systems and a way of communication between them.
+
+```go
+// Pushing an event
+
+if health[i].Value <= 0 {
+	world.EmitEvents(
+		DeathEvent{
+			Entity: e,
+		},
+	)
+}
+
+// Retrieving events
+
+events := zurvan.OnEvent[DeathEvent](world)
+```
+
+You can find a complete example demonstrating all of these concepts in the `examples/basic` directory.
