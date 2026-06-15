@@ -45,6 +45,7 @@ type scheduler struct {
 
 	tickRate    time.Duration
 	accumulator time.Duration
+	tick        uint64
 }
 
 func newScheduler(commands *commands, events *events, tickRate time.Duration) *scheduler {
@@ -55,6 +56,7 @@ func newScheduler(commands *commands, events *events, tickRate time.Duration) *s
 		events:      events,
 		tickRate:    tickRate,
 		accumulator: 0,
+		tick:        0,
 	}
 }
 
@@ -101,6 +103,7 @@ func (s *scheduler) run(world *World) {
 		for s.accumulator >= s.tickRate {
 			s.runStage(world, FixedUpdateStage, s.tickRate)
 			s.accumulator -= s.tickRate
+			s.tick += 1
 		}
 
 		s.runStage(world, UpdateStage, frameTime)

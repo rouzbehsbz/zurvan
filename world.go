@@ -76,3 +76,7 @@ func (w *World) EmitEvents(events ...any) {
 func (w *World) Run() {
 	w.scheduler.run(w)
 }
+
+func (w *World) Tick() uint64 {
+	return w.scheduler.tick
+}
