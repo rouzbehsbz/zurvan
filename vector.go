@@ -13,15 +13,19 @@ func newVector(elemType reflect.Type) *vector {
 }
 
 func (v *vector) resize(length int) {
-	if length <= v.data.Len() {
+	oldLen := v.data.Len()
+	if length <= v.data.Cap() {
 		v.data = v.data.Slice(0, length)
+		if length > oldLen {
+			// Reused slots may contain values from a previous shrink or removal.
+			v.data.Slice(oldLen, length).Clear()
+		}
 		return
 	}
 
-	newCap := length
-	newLen := length
-
-	newSlice := reflect.MakeSlice(v.data.Type(), newLen, newCap)
+	// Reserve extra capacity so successive insertions do not copy every row.
+	newCap := max(length, v.data.Cap()*2)
+	newSlice := reflect.MakeSlice(v.data.Type(), length, newCap)
 
 	reflect.Copy(newSlice, v.data)
 
