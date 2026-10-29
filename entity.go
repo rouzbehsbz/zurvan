@@ -1,18 +1,36 @@
 package zurvan
 
-// Entity represents a unique object in the world.
-// Index is the unique identifier assigned to the entity.
+import "sync/atomic"
+
+// Entity is a handle returned by World.Spawn for use within a single world.
+// Its index is read-only. The zero value is invalid.
 //
 // Limitation:
 //   - The maximum number of entities is 2^32 - 1 (approximately 4.29 billion)
-//   - Deleted entity indices will not be reused, so craeting and deleting large number of
-//     entities may eventually exhaust the available indices
+//   - Deleted entity indices are not reused. Spawn panics when IDs are exhausted.
 type Entity struct {
-	Index uint32
+	index uint32
+	alive *atomic.Bool
 }
 
 func newEntity(index uint32) Entity {
+	alive := new(atomic.Bool)
+	alive.Store(true)
+
 	return Entity{
-		Index: index,
+		index: index,
+		alive: alive,
 	}
+}
+
+func (e Entity) Index() uint32 {
+	return e.index
+}
+
+func (e Entity) isAlive() bool {
+	return e.alive != nil && e.alive.Load()
+}
+
+func (e Entity) destroy() bool {
+	return e.alive != nil && e.alive.CompareAndSwap(true, false)
 }

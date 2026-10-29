@@ -20,6 +20,7 @@ func newColumnEntry(componentId int, elemType reflect.Type) columnEntry {
 }
 
 type archetype struct {
+	mask     mask
 	entities []Entity
 	columns  []columnEntry
 
@@ -27,18 +28,24 @@ type archetype struct {
 }
 
 func newArchetype(entries []componentEntry) *archetype {
+	var componentMask mask
 	columns := []columnEntry{}
 	componentIndex := make(map[int]int, len(entries))
 
 	for _, entry := range entries {
+		if _, exists := componentIndex[entry.id]; exists {
+			continue
+		}
 		index := len(columns)
 
 		columns = append(columns, newColumnEntry(entry.id, entry.elemType))
 
 		componentIndex[entry.id] = index
+		componentMask.set(entry.id)
 	}
 
 	return &archetype{
+		mask:           componentMask,
 		entities:       []Entity{},
 		columns:        columns,
 		componentIndex: componentIndex,

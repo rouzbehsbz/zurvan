@@ -46,6 +46,8 @@ func (w *World) AddSystems(stage Stage, systems []System) {
 
 // Spawns a new entity and returns it.
 // The entity will be created with no components.
+// It is alive immediately and stays alive until its despawn command executes.
+// Panics if the world has exhausted its entity IDs.
 //
 // Note: This function is completely thread safe
 func (w *World) Spawn() Entity {

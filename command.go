@@ -51,6 +51,7 @@ type deleteComponentsCommand struct {
 }
 
 // Delete components from an existing entity
+// Missing components and repeated component types are ignored.
 func NewDeleteComponentsCommand(entity Entity, components ...any) *deleteComponentsCommand {
 	return &deleteComponentsCommand{
 		entity:     entity,
@@ -82,7 +83,7 @@ type despawnCommand struct {
 	entity Entity
 }
 
-// Despawn an existing entity from the world,
+// Despawn an entity, including one with no components.
 //
 // Limitations:
 //   - Right now the index of the despawned entity will not be reused

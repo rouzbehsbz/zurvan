@@ -7,14 +7,14 @@ import (
 )
 
 type entityLocation struct {
-	mask mask
-	row  int
+	maskKey string
+	row     int
 }
 
-func newEntityLocation(mask mask, row int) entityLocation {
+func newEntityLocation(maskKey string, row int) entityLocation {
 	return entityLocation{
-		mask: mask,
-		row:  row,
+		maskKey: maskKey,
+		row:     row,
 	}
 }
 
@@ -37,7 +37,7 @@ func sortComponentEntries(entries []componentEntry) {
 }
 
 type archetypeAllocator struct {
-	archetypes map[mask]*archetype
+	archetypes map[string]*archetype
 	locations  map[Entity]entityLocation
 
 	registry *registry
@@ -45,33 +45,36 @@ type archetypeAllocator struct {
 
 func newArchetypeAllocator(registry *registry) *archetypeAllocator {
 	return &archetypeAllocator{
-		archetypes: make(map[mask]*archetype),
+		archetypes: make(map[string]*archetype),
 		locations:  make(map[Entity]entityLocation),
 		registry:   registry,
 	}
 }
 
 func (a *archetypeAllocator) addComponents(entity Entity, components ...any) {
+	if !entity.isAlive() {
+		return
+	}
+
 	location, exists := a.locations[entity]
 	if exists {
-		target := a.archetypes[location.mask]
+		source := a.archetypes[location.maskKey]
 
 		var mask mask
 
 		for _, c := range components {
 			id := a.registry.dataIdOf(c)
-			mask |= maskBit(id)
+			mask.set(id)
 		}
 
-		if maskHasComponents(location.mask, mask) {
-			a.setComponents(target, location.row, components)
+		if maskHasComponents(source.mask, mask) {
+			a.setComponents(source, location.row, components)
 			return
 		}
 
-		newMask := location.mask | mask
-
-		source := a.archetypes[location.mask]
-		target, ok := a.archetypes[newMask]
+		newMask := maskUnion(source.mask, mask)
+		newMaskKey := newMask.key()
+		target, ok := a.archetypes[newMaskKey]
 		if !ok {
 			entries := make([]componentEntry, 0, len(components)+len(source.columns))
 
@@ -86,13 +89,13 @@ func (a *archetypeAllocator) addComponents(entity Entity, components ...any) {
 			sortComponentEntries(entries)
 
 			target = newArchetype(entries)
-			a.archetypes[newMask] = target
+			a.archetypes[newMaskKey] = target
 		}
 
 		newRow := target.addEntity(entity)
 
-		a.setComponents(target, newRow, components)
 		source.moveComponents(location.row, newRow, target)
+		a.setComponents(target, newRow, components)
 		swappedEntity, swappedRow := source.removeEntity(location.row)
 
 		if swappedRow != -1 {
@@ -101,7 +104,7 @@ func (a *archetypeAllocator) addComponents(entity Entity, components ...any) {
 			a.locations[swappedEntity] = swLocation
 		}
 
-		a.locations[entity] = newEntityLocation(newMask, newRow)
+		a.locations[entity] = newEntityLocation(newMaskKey, newRow)
 		return
 	}
 
@@ -111,50 +114,55 @@ func (a *archetypeAllocator) addComponents(entity Entity, components ...any) {
 
 	for _, c := range components {
 		id := a.registry.dataIdOf(c)
-		mask |= maskBit(id)
+		mask.set(id)
 		entries = append(entries, newComponentEntry(id, reflect.TypeOf(c)))
 	}
 
 	sortComponentEntries(entries)
 
-	targetArchetype, ok := a.archetypes[mask]
+	maskKey := mask.key()
+	targetArchetype, ok := a.archetypes[maskKey]
 	if !ok {
 		targetArchetype = newArchetype(entries)
-		a.archetypes[mask] = targetArchetype
+		a.archetypes[maskKey] = targetArchetype
 	}
 
 	row := targetArchetype.addEntity(entity)
 
 	a.setComponents(targetArchetype, row, components)
-	a.locations[entity] = newEntityLocation(mask, row)
+	a.locations[entity] = newEntityLocation(maskKey, row)
 }
 
 func (a *archetypeAllocator) deleteComponents(entity Entity, components ...any) {
+	if !entity.isAlive() {
+		return
+	}
+
 	location, exists := a.locations[entity]
 	if !exists {
 		return
 	}
 
-	mask := location.mask
+	source := a.archetypes[location.maskKey]
+	mask := slices.Clone(source.mask)
 	excludeCompIds := []int{}
 
 	for _, c := range components {
 		id := a.registry.dataIdOf(c)
 
-		if maskHasComponents(mask, maskBit(id)) {
-			mask &= ^maskBit(id)
+		if mask.unset(id) {
 			excludeCompIds = append(excludeCompIds, id)
 		}
 	}
 
-	if mask == location.mask {
+	if len(excludeCompIds) == 0 {
 		return
 	}
 
-	source := a.archetypes[location.mask]
-	target, ok := a.archetypes[mask]
+	maskKey := mask.key()
+	target, ok := a.archetypes[maskKey]
 	if !ok {
-		entries := make([]componentEntry, 0, len(source.columns)-len(components))
+		entries := make([]componentEntry, 0, len(source.columns)-len(excludeCompIds))
 
 		for _, column := range source.columns {
 			if slices.Contains(excludeCompIds, column.componentId) {
@@ -167,7 +175,7 @@ func (a *archetypeAllocator) deleteComponents(entity Entity, components ...any) 
 		sortComponentEntries(entries)
 
 		target = newArchetype(entries)
-		a.archetypes[mask] = target
+		a.archetypes[maskKey] = target
 	}
 
 	row := target.addEntity(entity)
@@ -180,16 +188,20 @@ func (a *archetypeAllocator) deleteComponents(entity Entity, components ...any) 
 		a.locations[swappedEntity] = swLocation
 	}
 
-	a.locations[entity] = newEntityLocation(mask, row)
+	a.locations[entity] = newEntityLocation(maskKey, row)
 }
 
 func (a *archetypeAllocator) removeEntity(entity Entity) {
+	if !entity.destroy() {
+		return
+	}
+
 	location, ok := a.locations[entity]
 	if !ok {
 		return
 	}
 
-	archetype := a.archetypes[location.mask]
+	archetype := a.archetypes[location.maskKey]
 
 	swappedEntity, swappedRow := archetype.removeEntity(location.row)
 	delete(a.locations, entity)
@@ -203,11 +215,10 @@ func (a *archetypeAllocator) removeEntity(entity Entity) {
 
 func (a *archetypeAllocator) matchingArchetypes(componentIds ...int) []*archetype {
 	archetypes := []*archetype{}
+	queryMask := maskBit(componentIds...)
 
-	for mask, archetype := range a.archetypes {
-		queryMask := maskBit(componentIds...)
-
-		if maskHasComponents(mask, queryMask) {
+	for _, archetype := range a.archetypes {
+		if maskHasComponents(archetype.mask, queryMask) {
 			archetypes = append(archetypes, archetype)
 		}
 	}
@@ -221,7 +232,7 @@ func (a *archetypeAllocator) matchingArchetype(entity Entity) (*archetype, int) 
 		return nil, -1
 	}
 
-	archetype := a.archetypes[location.mask]
+	archetype := a.archetypes[location.maskKey]
 	return archetype, location.row
 }
 

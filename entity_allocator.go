@@ -1,6 +1,7 @@
 package zurvan
 
 import (
+	"math"
 	"sync/atomic"
 )
 
@@ -15,7 +16,15 @@ func newEntityAllocator() *entityAllocator {
 }
 
 func (e *entityAllocator) create() Entity {
-	entityId := e.counter.Add(1)
+	for {
+		current := e.counter.Load()
 
-	return newEntity(entityId)
+		if current == math.MaxUint32 {
+			panic("zurvan: entity IDs exhausted")
+		}
+
+		if e.counter.CompareAndSwap(current, current+1) {
+			return newEntity(current + 1)
+		}
+	}
 }
