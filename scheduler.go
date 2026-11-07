@@ -85,7 +85,6 @@ func (s *scheduler) runStage(ctx context.Context, world *World, stage Stage, dt 
 		system.Update(world, dt)
 
 		s.commands.apply(world)
-		s.events.apply()
 	}
 
 	return ctx.Err() == nil
@@ -97,9 +96,6 @@ func (s *scheduler) run(ctx context.Context, world *World) {
 		s.events.apply()
 
 		s.runStage(context.Background(), world, EndStage, 0)
-
-		s.commands.apply(world)
-		s.events.apply()
 
 		s.events.clear()
 	}()
@@ -116,6 +112,8 @@ func (s *scheduler) run(ctx context.Context, world *World) {
 	defer timer.Stop()
 
 	for ctx.Err() == nil {
+		s.events.apply()
+
 		now := time.Now()
 		frameTime := now.Sub(last)
 		last = now

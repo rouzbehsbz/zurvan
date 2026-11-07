@@ -63,8 +63,9 @@ func (w *World) PushCommands(commands ...command) {
 	w.commands.addCommand(commands)
 }
 
-// Emits events that will be processed after the current system execution.
-// Events will be processed in the order they were emitted.
+// EmitEvents queues events for publication at the start of the next frame.
+// Events are published in queue order. Events emitted during a frame stay
+// pending until the next frame, so every update system reads the same snapshot.
 //
 // Note: This function is completely thread safe
 func (w *World) EmitEvents(events ...any) {
@@ -74,6 +75,7 @@ func (w *World) EmitEvents(events ...any) {
 // Run executes systems until ctx is canceled. Cancellation lets the current
 // system finish and applies its commands and events before running EndStage.
 // EndStage runs even if ctx is already canceled when Run is called.
+// Pending events are published before EndStage and after each shutdown system.
 //
 // Shutdown systems should stop and join background producers before returning
 // so their commands are included in the final flush. Run must not be called

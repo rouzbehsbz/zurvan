@@ -44,7 +44,10 @@ func (e *events) clear() {
 	}
 }
 
-// Returns a slice of events of type T that were emitted during the current frame
+// OnEvent returns the current frame's snapshot of events of type T.
+// Reading events does not consume them. Events emitted during the frame become
+// readable next frame. Treat the slice as read-only and do not retain it beyond
+// the frame. EndStage also sees events published during shutdown.
 func OnEvent[T any](w *World) []T {
 	eventId := dataIdFor[T](w.events.registry)
 

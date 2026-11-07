@@ -100,7 +100,7 @@ zurvan.Resource[*Players](world)
 ```
 
 ### Event
-An event is a message that represents something that happened during a single tick. It can be emitted and should be consumed within the same tick by upstream systems. At the end of the tick, all events are cleared. Events are used for decoupling systems and a way of communication between them.
+An event is a message that represents something that happened during a single frame. It can be emitted and should be consumed within the same frame by upstream systems. At the end of the frame, all events are cleared. Events are used for decoupling systems and a way of communication between them.
 
 ```go
 // Pushing an event
