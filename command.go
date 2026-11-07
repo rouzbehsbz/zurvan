@@ -1,28 +1,27 @@
 package zurvan
 
-const commandBufferSize int = 1024
-
 type command interface {
 	execute(w *World)
 }
 
 type commands struct {
-	commands chan command
+	commands *queue[command]
 }
 
 func newCommands() *commands {
 	return &commands{
-		commands: make(chan command, commandBufferSize),
+		commands: newQueue[command](),
 	}
 }
 
-func (c *commands) addCommand(command command) {
-	c.commands <- command
+func (c *commands) addCommand(commands []command) {
+	c.commands.push(commands)
 }
 
 func (c *commands) apply(w *World) {
-	for len(c.commands) > 0 {
-		command := <-c.commands
+	commands := c.commands.drain()
+
+	for _, command := range commands {
 		command.execute(w)
 	}
 }

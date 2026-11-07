@@ -59,9 +59,7 @@ func (w *World) Spawn() Entity {
 //
 // Note: This function is completely thread safe
 func (w *World) PushCommands(commands ...command) {
-	for _, command := range commands {
-		w.commands.addCommand(command)
-	}
+	w.commands.addCommand(commands)
 }
 
 // Emits events that will be processed after the current system execution.
@@ -69,9 +67,7 @@ func (w *World) PushCommands(commands ...command) {
 //
 // Note: This function is completely thread safe
 func (w *World) EmitEvents(events ...any) {
-	for _, event := range events {
-		w.events.emit(event)
-	}
+	w.events.emit(events)
 }
 
 // Runs the world, executing systems and processing commands and events.

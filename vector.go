@@ -16,14 +16,14 @@ func (v *vector) resize(length int) {
 	oldLen := v.data.Len()
 	if length <= v.data.Cap() {
 		v.data = v.data.Slice(0, length)
+
 		if length > oldLen {
-			// Reused slots may contain values from a previous shrink or removal.
 			v.data.Slice(oldLen, length).Clear()
 		}
+
 		return
 	}
 
-	// Reserve extra capacity so successive insertions do not copy every row.
 	newCap := max(length, v.data.Cap()*2)
 	newSlice := reflect.MakeSlice(v.data.Type(), length, newCap)
 

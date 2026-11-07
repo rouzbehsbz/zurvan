@@ -80,8 +80,9 @@ func (s *scheduler) runStage(world *World, stage Stage, dt time.Duration) {
 	systems := s.stage(stage)
 
 	for _, system := range systems {
-		s.commands.apply(world)
 		system.Update(world, dt)
+
+		s.commands.apply(world)
 		s.events.apply()
 	}
 }
