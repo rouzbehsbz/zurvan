@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/rouzbehsbz/zurvan"
 )
 
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer stop()
 
 	world := zurvan.NewWorld(16 * time.Millisecond)
@@ -43,10 +42,6 @@ type Position struct {
 
 type Velocity struct {
 	X, Y float64
-}
-
-type Zone struct {
-	Id int
 }
 
 type DeathEvent struct {
