@@ -1,6 +1,7 @@
 package zurvan
 
 import (
+	"context"
 	"time"
 )
 
@@ -37,8 +38,6 @@ func BuildStageSystems(stage Stage, systems ...System) (Stage, []System) {
 }
 
 type scheduler struct {
-	isRunning bool
-
 	systems  map[Stage][]System
 	commands *commands
 	events   *events
@@ -50,7 +49,6 @@ type scheduler struct {
 
 func newScheduler(commands *commands, events *events, tickRate time.Duration) *scheduler {
 	return &scheduler{
-		isRunning:   true,
 		systems:     make(map[Stage][]System),
 		commands:    commands,
 		events:      events,
@@ -76,46 +74,81 @@ func (s *scheduler) addSystem(stage Stage, system System) {
 	s.systems[stage] = systems
 }
 
-func (s *scheduler) runStage(world *World, stage Stage, dt time.Duration) {
+func (s *scheduler) runStage(ctx context.Context, world *World, stage Stage, dt time.Duration) bool {
 	systems := s.stage(stage)
 
 	for _, system := range systems {
+		if ctx.Err() != nil {
+			return false
+		}
+
 		system.Update(world, dt)
 
 		s.commands.apply(world)
 		s.events.apply()
 	}
+
+	return ctx.Err() == nil
 }
 
-func (s *scheduler) run(world *World) {
+func (s *scheduler) run(ctx context.Context, world *World) {
+	defer func() {
+		s.commands.apply(world)
+		s.events.apply()
+
+		s.runStage(context.Background(), world, EndStage, 0)
+
+		s.commands.apply(world)
+		s.events.apply()
+
+		s.events.clear()
+	}()
+
+	s.commands.apply(world)
+	s.events.apply()
+	if !s.runStage(ctx, world, StartupStage, 0) {
+		return
+	}
+
 	last := time.Now()
 
-	s.runStage(world, StartupStage, 0)
+	timer := time.NewTimer(s.tickRate)
+	defer timer.Stop()
 
-	for s.isRunning {
+	for ctx.Err() == nil {
 		now := time.Now()
 		frameTime := now.Sub(last)
 		last = now
 
 		s.accumulator += frameTime
 
-		s.runStage(world, PreUpdateStage, frameTime)
+		if !s.runStage(ctx, world, PreUpdateStage, frameTime) {
+			return
+		}
 
 		for s.accumulator >= s.tickRate {
-			s.runStage(world, FixedUpdateStage, s.tickRate)
+			if !s.runStage(ctx, world, FixedUpdateStage, s.tickRate) {
+				return
+			}
 			s.accumulator -= s.tickRate
 			s.tick += 1
 		}
 
-		s.runStage(world, UpdateStage, frameTime)
+		if !s.runStage(ctx, world, UpdateStage, frameTime) {
+			return
+		}
 
 		s.events.clear()
 
 		sleepTime := s.tickRate - time.Since(now)
 		if sleepTime > 0 {
-			time.Sleep(sleepTime)
+			timer.Reset(sleepTime)
+
+			select {
+			case <-ctx.Done():
+				return
+			case <-timer.C:
+			}
 		}
 	}
-
-	s.runStage(world, EndStage, 0)
 }

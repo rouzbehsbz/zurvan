@@ -1,13 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/rouzbehsbz/zurvan"
 )
 
 func main() {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	world := zurvan.NewWorld(16 * time.Millisecond)
 
 	world.AddSystems(
@@ -27,7 +34,7 @@ func main() {
 		),
 	)
 
-	world.Run()
+	world.Run(ctx)
 }
 
 type Position struct {

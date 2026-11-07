@@ -1,6 +1,7 @@
 package zurvan
 
 import (
+	"context"
 	"time"
 )
 
@@ -70,9 +71,16 @@ func (w *World) EmitEvents(events ...any) {
 	w.events.emit(events)
 }
 
-// Runs the world, executing systems and processing commands and events.
-func (w *World) Run() {
-	w.scheduler.run(w)
+// Run executes systems until ctx is canceled. Cancellation lets the current
+// system finish and applies its commands and events before running EndStage.
+// EndStage runs even if ctx is already canceled when Run is called.
+//
+// Shutdown systems should stop and join background producers before returning
+// so their commands are included in the final flush. Run must not be called
+// concurrently for the same world. Blocking systems must handle cancellation
+// themselves; Run cannot interrupt System.Update.
+func (w *World) Run(ctx context.Context) {
+	w.scheduler.run(ctx, w)
 }
 
 func (w *World) Tick() uint64 {
