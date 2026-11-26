@@ -1,12 +1,29 @@
 # Zurvan
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/rouzbehsbz/zurvan.svg)](https://pkg.go.dev/github.com/rouzbehsbz/zurvan)
+[![Go Reference](https://pkg.go.dev/badge/github.com/rouzbehsbz/zurvan/v2.svg)](https://pkg.go.dev/github.com/rouzbehsbz/zurvan/v2)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/rouzbehsbz/zurvan)
 [![Build Status](https://github.com/rouzbehsbz/zurvan/actions/workflows/build.yml/badge.svg)](https://github.com/rouzbehsbz/zurvan/actions/workflows/build.yml)
 
 > Zurvan (زُروان) — pronounced ZOOR-vahn — a Persian name of Avestan origin meaning “Time,” often associated with eternity and the primordial source of existence.
 
 This library implements the Entity Component System (ECS) architecture. ECS is based on data-oriented design principles. Instead of organizing code around objects, it focuses on organizing data in a cache-friendly memory layout. This approach improves CPU cache utilization and can significantly enhance performance for both read and write operations. ECS is especially useful for performance-critical applications such as game engines or large-scale simulations, where a high number of entities with diverse behaviors must be processed efficiently.
+
+## Installation
+
+Requires Go 1.25.6 or later.
+
+```sh
+go get github.com/rouzbehsbz/zurvan/v2@v2.0.0
+```
+
+Import the library as `"github.com/rouzbehsbz/zurvan/v2"`.
+
+### Migrating from v1
+
+Update imports to use the `/v2` path and pass a context to `world.Run(ctx)`.
+Cancel the context to stop the scheduler gracefully and run `EndStage` systems.
+Events emitted during a frame become visible at the start of the next frame,
+so all update systems read the same event snapshot.
 
 ## Overview
 In ECS, entities are simply unique identifiers that group components together. They do not contain any logic themselves. Systems are pure functions that operate on components. They query for entities that match a specific set of components and then execute logic on them, potentially mutating their state. For example, you might have entities with `Position` and `Velocity` components. A `MovementSystem` would query all entities that contain both components, apply movement logic, and update their positions accordingly.
@@ -100,7 +117,7 @@ zurvan.Resource[*Players](world)
 ```
 
 ### Event
-An event is a message that represents something that happened during a single frame. It can be emitted and should be consumed within the same frame by upstream systems. At the end of the frame, all events are cleared. Events are used for decoupling systems and a way of communication between them.
+An event is a message that represents something that happened. Events emitted during a frame become readable at the start of the next frame. All update systems read the same snapshot, which is cleared at the end of that frame. Reading events does not consume them. Events are used for decoupling systems and a way of communication between them.
 
 ```go
 // Pushing an event

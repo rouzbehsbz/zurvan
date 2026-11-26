@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/rouzbehsbz/zurvan"
+	"github.com/rouzbehsbz/zurvan/v2"
 )
 
 func main() {
