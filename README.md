@@ -18,13 +18,6 @@ go get github.com/rouzbehsbz/zurvan/v2@v2.0.0
 
 Import the library as `"github.com/rouzbehsbz/zurvan/v2"`.
 
-### Migrating from v1
-
-Update imports to use the `/v2` path and pass a context to `world.Run(ctx)`.
-Cancel the context to stop the scheduler gracefully and run `EndStage` systems.
-Events emitted during a frame become visible at the start of the next frame,
-so all update systems read the same event snapshot.
-
 ## Overview
 In ECS, entities are simply unique identifiers that group components together. They do not contain any logic themselves. Systems are pure functions that operate on components. They query for entities that match a specific set of components and then execute logic on them, potentially mutating their state. For example, you might have entities with `Position` and `Velocity` components. A `MovementSystem` would query all entities that contain both components, apply movement logic, and update their positions accordingly.
 
